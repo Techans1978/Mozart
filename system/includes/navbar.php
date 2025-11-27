@@ -4,6 +4,12 @@
         <div id="wrapper">
 
             <!-- Navigation -->
+            $menusBack = mozart_get_menu('back');
+
+            foreach ($menusBack as $moduleSlug => $items) {
+                // $items é o array de menu que você definiu no manifest do módulo
+                // aqui você só renderiza (respeitando ícones, children, etc.)
+            }
             <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
                 <div class="navbar-header">
                     <img src="<?= BASE_URL ?>/data/media/media_sytem/images/logo_mozart.png" alt="<?= APP_NAME ?>" width="160px">
