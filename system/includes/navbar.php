@@ -1,11 +1,12 @@
 <?php
-// NUNCA deixe espaços acima deste <?php
-
-require_once __DIR__ . '/../config.php';
-require_once ROOT_PATH . '/system/config/autenticacao.php';
-
 // sistema de menus
 require_once ROOT_PATH . '/system/includes/mozart_menu.php';
+require_once ROOT_PATH . '/system/includes/mozart_menu_render.php';
+
+// carregar sistema de menus (apenas carrega a função já existente)
+require_once ROOT_PATH . '/system/includes/mozart_menu.php';
+
+// renderização (funções de HTML)
 require_once ROOT_PATH . '/system/includes/mozart_menu_render.php';
 
 // Carrega menus dinâmicos do backend (sidebar)
