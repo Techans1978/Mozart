@@ -60,6 +60,7 @@ if (wpp_table_exists($conn, 'moz_wpp_conversa')) {
     }
 }
 ?>
+<?php include_once ROOT_PATH.'system/includes/navbar.php'; ?>
 <div class="container-fluid moz-content">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h3 mb-0">

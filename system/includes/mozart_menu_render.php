@@ -27,6 +27,26 @@ function mozart_menu_is_active(string $url): bool
 }
 
 /**
+ * Verifica se algum filho (ou neto) está ativo
+ */
+function mozart_menu_children_active(array $children): bool
+{
+    foreach ($children as $child) {
+        $childUrl  = $child['url'] ?? '#';
+        $grandsons = $child['children'] ?? [];
+
+        if (mozart_menu_is_active($childUrl)) {
+            return true;
+        }
+
+        if (!empty($grandsons) && mozart_menu_children_active($grandsons)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
  * Renderiza um item individual, podendo ter submenus.
  */
 function renderSidebarItem(array $item, int $depth = 1): void
@@ -37,13 +57,26 @@ function renderSidebarItem(array $item, int $depth = 1): void
         return;
     }
 
-    $label      = $item['label'] ?? 'Item';
-    $icon       = $item['icon'] ?? '';
-    $url        = $item['url'] ?? '#';
-    $children   = $item['children'] ?? [];
-    $hasChild   = !empty($children);
-    $active     = mozart_menu_is_active($url);
-    $activeClass = $active ? 'active' : '';
+    $label    = $item['label']    ?? 'Item';
+    $icon     = $item['icon']     ?? '';
+    $url      = $item['url']      ?? '#';
+    $children = $item['children'] ?? [];
+    $hasChild = !empty($children);
+
+    // Ativo: próprio link ou algum filho ativo
+    $selfActive   = mozart_menu_is_active($url);
+    $childActive  = $hasChild ? mozart_menu_children_active($children) : false;
+    $isActive     = $selfActive || $childActive;
+
+    $liClasses = [];
+    if ($isActive) {
+        $liClasses[] = 'active';
+    }
+    if ($hasChild) {
+        $liClasses[] = 'has-children';
+    }
+
+    $liClassAttr = $liClasses ? ' class="'.implode(' ', $liClasses).'"' : '';
 
     // UL de children conforme nível
     $ulClass = match ($depth) {
@@ -52,20 +85,23 @@ function renderSidebarItem(array $item, int $depth = 1): void
         default => 'nav nav-level-' . $depth,
     };
 
-    echo '<li class="' . $activeClass . '">';
+    echo '<li' . $liClassAttr . '>';
 
-    echo '<a href="' . htmlspecialchars($url) . '">';
+    // Link do item:
+    // - se tem filhos e não tem URL definida, usamos "#"
+    // - se tem URL, usamos a URL normalmente
+    $href = ($hasChild && ($url === '#' || trim($url) === ''))
+        ? '#'
+        : $url;
 
-    // Ícone (SVG ou font)
-    if ($icon) {
-        if (str_contains($icon, 'ti ') || str_contains($icon, 'fa ')) {
-            echo '<i class="' . $icon . '"></i> ';
-        } else {
-            echo '<i class="' . $icon . '"></i> ';
-        }
+    echo '<a href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '">';
+
+    // Ícone (apenas no primeiro nível, para não poluir submenus)
+    if ($icon && $depth === 1) {
+        echo '<i class="' . htmlspecialchars($icon, ENT_QUOTES, 'UTF-8') . '"></i> ';
     }
 
-    echo htmlspecialchars($label);
+    echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
 
     if ($hasChild) {
         echo ' <span class="fa arrow"></span>';

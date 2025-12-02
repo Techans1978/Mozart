@@ -48,6 +48,7 @@ if ($res === false) {
 require_once ROOT_PATH . '/system/includes/head.php';
 ?>
 <link rel="stylesheet" href="assets/css/wpp_chat.css?ver=1">
+<?php include_once ROOT_PATH.'system/includes/navbar.php'; ?>
 
 <div class="container-fluid mt-3">
     <div class="d-flex justify-content-between align-items-center mb-3">

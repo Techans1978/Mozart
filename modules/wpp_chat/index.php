@@ -6,7 +6,7 @@ require_once ROOT_PATH.'/system/config/connect.php';
 require_once __DIR__.'/includes/helpers.php';
 // require_once __DIR__.'/includes/guard.php';
 
-require_once ROOT_PATH.'/system/includes/header.php';
+require_once ROOT_PATH.'/system/includes/head.php';
 
 global $conn;
 
@@ -17,7 +17,7 @@ $conversas_total = $conn->query("SELECT COUNT(*) AS c FROM moz_wpp_conversa")->f
 
 ?>
 <link rel="stylesheet" href="assets/css/wpp_chat.css?ver=1">
-
+<?php include_once ROOT_PATH.'system/includes/navbar.php'; ?>
 <div class="container-fluid mt-3">
     <h1>WPP Chat — Dashboard</h1>
     <p class="text-muted">Visão geral das instâncias, campanhas e conversas.</p>

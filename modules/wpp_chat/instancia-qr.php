@@ -410,6 +410,7 @@ require_once ROOT_PATH . '/system/includes/head.php';
   .wpp-actions button{padding:10px 14px;border:0;border-radius:8px;background:#0a66c2;color:#fff;cursor:pointer}
   .wpp-flex{display:flex;gap:14px;flex-wrap:wrap}
 </style>
+<?php include_once ROOT_PATH.'system/includes/navbar.php'; ?>
 
 <div class="container-fluid mt-3">
   <div class="wpp-card">

@@ -18,43 +18,61 @@ return [
     'menu' => [
         'back' => [
             [
-                'label' => '<i class="ti ti-planet"></i> Intranet',
+                'label' => 'Intranet',
+                'icon'  => 'fa fa-comments',   // **icone separado**
                 'children' => [
                     [
-                        'label' => 'Notícias',
-                        'route' => BASE_URL.'/modules/intranet/news-listar.php',
+                        'label'    => 'Artigos',
+                        'url'      => BASE_URL.'/pages/conteudo_listar.php',
                         'requires' => ['intranet:news:read'],
                     ],
                     [
-                        'label' => 'Documentos',
-                        'route' => BASE_URL.'/modules/intranet/docs-listar.php',
-                        'requires' => ['intranet:docs:read'],
+                        'label'    => 'Categorias de Artigos',
+                        'url'      => BASE_URL.'/pages/conteudo_categorias.php',
+                        'requires' => ['intranet:news:read'],
                     ],
                     [
-                        'label' => 'Agenda / Eventos',
-                        'route' => BASE_URL.'/modules/intranet/events-listar.php',
-                        'requires' => ['intranet:events:read'],
+                        'label'    => 'Dicas',
+                        'url'      => BASE_URL.'/pages/dicas_listar.php',
+                        'requires' => ['intranet:news:read'],
+                    ],
+                    [
+                        'label'    => 'Mídia Feed',
+                        'url'      => BASE_URL.'/pages/media_listar.php',
+                        'requires' => ['intranet:news:read'],
+                    ],
+                    [
+                        'label'    => 'Documentos',
+                        'url'      => BASE_URL.'/pages/docs_listar.php',
+                        'requires' => ['intranet:news:read'],
+                    ],
+                    [
+                        'label'    => 'Calendário de Eventos',
+                        'url'      => BASE_URL.'/pages/event_listar.php',
+                        'requires' => ['intranet:news:read'],
                     ],
                 ],
             ],
         ],
+
         'front' => [
             [
-                'label' => '<i class="ti ti-planet"></i> Intranet',
+                'label' => 'Intranet',
+                'icon'  => 'fa fa-comments',
                 'children' => [
                     [
-                        'label' => 'Notícias',
-                        'route' => BASE_URL.'/modules/intranet/news-listar.php',
+                        'label'    => 'Notícias',
+                        'url'      => BASE_URL.'/modules/intranet/news-listar.php',
                         'requires' => ['intranet:news:read'],
                     ],
                     [
-                        'label' => 'Documentos',
-                        'route' => BASE_URL.'/modules/intranet/docs-listar.php',
+                        'label'    => 'Documentos',
+                        'url'      => BASE_URL.'/modules/intranet/docs-listar.php',
                         'requires' => ['intranet:docs:read'],
                     ],
                     [
-                        'label' => 'Agenda / Eventos',
-                        'route' => BASE_URL.'/modules/intranet/events-listar.php',
+                        'label'    => 'Agenda / Eventos',
+                        'url'      => BASE_URL.'/modules/intranet/events-listar.php',
                         'requires' => ['intranet:events:read'],
                     ],
                 ],
@@ -62,10 +80,20 @@ return [
         ],
     ],
 
+    // Rotas para RBAC (path = exatamente o que vem em $_SERVER['SCRIPT_NAME'])
     'routes' => [
-        [ 'path' => '/modules/intranet/news-listar.php',    'requires' => ['intranet:news:read'] ],
-        [ 'path' => '/modules/intranet/docs-listar.php',    'requires' => ['intranet:docs:read'] ],
-        [ 'path' => '/modules/intranet/events-listar.php',  'requires' => ['intranet:events:read'] ],
+        // Backend (páginas em /pages)
+        [ 'path' => '/pages/conteudo_listar.php',      'requires' => ['intranet:news:read'] ],
+        [ 'path' => '/pages/conteudo_categorias.php',  'requires' => ['intranet:news:read'] ],
+        [ 'path' => '/pages/dicas_listar.php',         'requires' => ['intranet:news:read'] ],
+        [ 'path' => '/pages/media_listar.php',         'requires' => ['intranet:news:read'] ],
+        [ 'path' => '/pages/docs_listar.php',          'requires' => ['intranet:docs:read'] ],
+        [ 'path' => '/pages/event_listar.php',         'requires' => ['intranet:events:read'] ],
+
+        // Frontend (módulo intranet)
+        [ 'path' => '/modules/intranet/news-listar.php',   'requires' => ['intranet:news:read'] ],
+        [ 'path' => '/modules/intranet/docs-listar.php',   'requires' => ['intranet:docs:read'] ],
+        [ 'path' => '/modules/intranet/events-listar.php', 'requires' => ['intranet:events:read'] ],
     ],
 
     'role_defaults' => [

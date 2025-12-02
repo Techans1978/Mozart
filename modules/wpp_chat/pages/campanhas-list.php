@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 require_once __DIR__ . '/../../../config.php';
 require_once ROOT_PATH . '/system/config/autenticacao.php';
 require_once ROOT_PATH . '/system/config/connect.php';
-require_once ROOT_PATH . '/system/includes/header.php';
+require_once ROOT_PATH . '/system/includes/head.php';
 require_once __DIR__ . '/../includes/wpp_guard.php';
 require_once __DIR__ . '/../includes/wpp_campaigns.php';
 
@@ -21,6 +21,7 @@ $filtros = [
 
 $campanhas = wpp_campanha_find_all($conn, $filtros);
 ?>
+<?php include_once ROOT_PATH.'system/includes/navbar.php'; ?>
 <div class="container-fluid moz-content">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h4 mb-0">Campanhas de WhatsApp</h1>

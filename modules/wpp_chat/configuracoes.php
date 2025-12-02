@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 require_once __DIR__ . '/../../config.php';
 require_once ROOT_PATH . '/system/config/autenticacao.php';
 require_once ROOT_PATH . '/system/config/connect.php';
-require_once ROOT_PATH . '/system/includes/header.php';
+require_once ROOT_PATH . '/system/includes/head.php';
 // require_once __DIR__ . '/includes/guard.php';
 
 proteger_pagina();
@@ -34,6 +34,7 @@ if (wpp_table_exists($conn, 'moz_wpp_instance')) {
 // Monta base para o webhook (ajuste se o path no seu ambiente for diferente)
 $webhookBase = rtrim(BASE_URL, '/') . '/public/modules/wpp_chat/webhook.php?session=';
 ?>
+<?php include_once ROOT_PATH.'system/includes/navbar.php'; ?>
 <div class="container-fluid moz-content">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h3 mb-0">
