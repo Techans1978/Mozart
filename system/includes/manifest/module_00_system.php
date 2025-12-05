@@ -68,7 +68,7 @@ return [
                     ],
                     [
                         'label'    => 'Níveis de Acesso',
-                        'url'      => BASE_URL.'/pages/niveis_listar.php',
+                        'url'      => BASE_URL.'/pages/niveis_list.php',
                         'requires' => ['auth:roles:read'],
                     ],
                     [
@@ -86,13 +86,6 @@ return [
                         'label'    => 'Empresas e Coligadas',
                         'url'      => BASE_URL.'/pages/empresas_listar.php',
                         'requires' => ['empresas:empresas:read'],
-                    ],
-                    [
-                        'label'    => 'Criar Empresas e Coligadas',
-                        // se você tiver um form separado, troca aqui:
-                        // 'url' => BASE_URL.'/pages/empresas_form.php',
-                        'url'      => BASE_URL.'/pages/empresas_listar.php',
-                        'requires' => ['empresas:empresas:create'],
                     ],
                 ],
             ],

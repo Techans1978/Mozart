@@ -37,6 +37,7 @@ include_once ROOT_PATH . '/system/includes/head.php';
                                     </div>
 
 									<button type="submit">Entrar</button>
+                                    <p style="margin-top:25px;"><a href="<?= BASE_URL ?>/modules/gestao_terceiros/index.php">Cadastrar Terceiro</a><p>
                                     <p style="margin-top:25px;"><a href="<?= BASE_URL ?>/recuperar_senha.php">Recuperar Senha</a><p>
 								</form>
 							</fieldset>

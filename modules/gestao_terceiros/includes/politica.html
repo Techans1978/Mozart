@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Cadastro de Prestadores Terceiros</title>
+
+
+
+    <meta name="description" content="Cadastre-se na Gestão de Terceiros do Grupo ABC e otimize suas parcerias. Acesse oportunidades exclusivas e suporte especializado.">
+
+    <meta name="author" content="Grupo ABC!">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+	 
+	     <style>
+        /* Estilos simples para o formulário */
+        form {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+        }
+    </style>
+    <!-- Inclua a biblioteca jQuery para o autocompletar -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script>
+        $(function() {
+            $("#fornecedor").autocomplete({
+                source: 'autocomplete.php'
+            });
+
+            // Mostrar/ocultar campo de nome da agência
+            $("#tem_agencia").change(function() {
+                if ($(this).val() === "Sim") {
+                    $("#nome_agencia").show();
+                } else {
+                    $("#nome_agencia").hide();
+                }
+            }).trigger('change');
+        });
+    </script>
+
+  </head>
+  <body>
+
+    <div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			<nav class="navbar navbar-expand-lg navbar-light bg-light">
+				 
+				<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				<span class="navbar-toggler-icon"></span>
+				</button> <a class="navbar-brand" href="../index.html"><img class="logo-image d-none d-lg-inline-block" src="../images/grupo-abc-logo.png" alt="Grupo ABC" width="150px" height="auto"></a>
+				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+					<ul class="navbar-nav">
+						<li class="nav-item active">
+							 <a class="nav-link" href="https://grupo.superabc.com.br" target="_blank">Grupo ABC</a>
+						</li>
+						<li class="nav-item">
+							 <a class="nav-link" href="../includes/politica.html">Política de Privacidade</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+<img alt="Cadastro de Promotores" src="../images/banner.jpg" width="100%" height="auto">
+		</div>
+	</div>
+	<br><br><div class="row">
+		<div class="col-md-12">
+			<h2>Política de Privacidade para Cadastro de Prestadores Terceiros</h2>
+
+<h3>Introdução</h3>
+<p>Esta política de privacidade descreve como o Grupo ABC coleta, usa, armazena e protege os dados pessoais dos prestadores terceiros. Estamos comprometidos em garantir que sua privacidade esteja protegida. Se solicitarmos que você forneça certas informações pelas quais você possa ser identificado, garantimos que essas informações serão usadas de acordo com esta política de privacidade.</p>
+
+<h3>Informações Coletadas</h3>
+<p>Coletamos as seguintes informações pessoais para fins de cadastro de prestadores terceiros: Nome completo, CPF, Informações sobre a agência (se aplicável), Fornecedor associado, Número de telefone celular.</p>
+
+<h3>Uso das Informações</h3>
+<p>As informações pessoais coletadas são utilizadas exclusivamente para:
+Identificação e cadastro de prestadores terceiros; Comunicação e envio de informações pertinentes às atividades profissionais; Cumprimento de requisitos legais e regulatórios.</p>
+
+<h3>Segurança dos Dados</h3>
+<p>O Grupo ABC está comprometido em garantir que suas informações estejam seguras. Para prevenir acesso não autorizado ou divulgação, implementamos procedimentos físicos, eletrônicos e administrativos adequados para proteger e resguardar as informações que coletamos online. Isso inclui:</p>
+
+<p>Uso de servidores seguros e tecnologias de criptografia para armazenar dados; Acesso restrito a informações pessoais apenas para funcionários autorizados e para fins legítimos.</p>
+
+<h3>Não Compartilhamento de Dados</h3>
+<p>O Grupo ABC não compartilha, vende, aluga ou divulga suas informações pessoais a terceiros, a menos que tenhamos seu consentimento ou sejamos obrigados por lei a fazê-lo. Qualquer compartilhamento necessário será realizado em conformidade com as leis de proteção de dados aplicáveis.</p>
+
+<h3>Retenção de Dados</h3>
+<p>Os dados pessoais serão retidos apenas pelo tempo necessário para cumprir os propósitos para os quais foram coletados, incluindo quaisquer requisitos legais ou contábeis.</p>
+
+<h3>Seus Direitos</h3>
+<p>Você tem o direito de acessar, corrigir, atualizar ou solicitar a exclusão de suas informações pessoais a qualquer momento. Para exercer esses direitos, entre em contato conosco através das informações fornecidas abaixo.</p>
+
+<h3>Alterações nesta Política de Privacidade</h3>
+<p>O Grupo ABC pode atualizar esta política de privacidade periodicamente. Recomendamos que você revise esta página ocasionalmente para garantir que está ciente de quaisquer alterações. Esta política de privacidade é efetiva a partir de 19 de novembro de 2024.</p>
+
+<h3>Contato</h3>
+<p>Se você tiver dúvidas ou preocupações sobre esta política de privacidade ou sobre o tratamento de seus dados pessoais, entre em contato conosco através do <a href="https://api.whatsapp.com/send?phone=553799353760&text=Gostaria%20de%20obter%20informa%C3%A7%C3%B5es%20sobre%20o%20status%20do%20meu%20cadastro%20na%20Gest%C3%A3o%20de%20Terceiros%20do%20Grupo%20ABC." target="_blank">SAC</a>
+</p>
+
+
+
+
+
+ 
+		</div>
+	</div>
+</div>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/scripts.js"></script>
+  </body>
+</html>

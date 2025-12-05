@@ -41,7 +41,7 @@
       background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px; margin: var(--gap) 0;
     }
     .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    label { font-size:12px; color:#6b7280; }
+    label { font-size:12px; color:#6b7280; display:block;}
     select, input[type="text"] {
       border:1px solid #d1d5db; border-radius:8px; padding:6px 8px; min-width: 160px; background:#fff;
     }

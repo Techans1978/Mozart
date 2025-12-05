@@ -3,7 +3,7 @@
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
-require_once __DIR__ . '/../config.php'; // ajuste se necessário
+require_once __DIR__ . '/../../config.php'; // ajuste se necessário
 ?>
 <!-- Topbar -->
 <header class="topbar">
@@ -65,7 +65,7 @@ require_once __DIR__ . '/../config.php'; // ajuste se necessário
             <span>Meu Perfil</span>
           </a>
 
-          <a class="item" href="<?= BASE_URL >/pages/user_senha_usuario.php">
+          <a class="item" href="<?= BASE_URL ?>/pages/user_senha_usuario.php">
             <span class="mini-round c-indigo">
               <svg><use href="#i-key"/></svg>
             </span>

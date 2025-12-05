@@ -9,8 +9,8 @@
   .btn.primary { background:#111827; color:#fff; border-color:#111827; }
   .wrap { display:flex; gap:var(--gap); padding:var(--gap); height: calc(100vh - 58px); }
   .col { background:#fff; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
-  #editorCol { flex:1; min-width:500px; position: relative; }
-  #previewCol { flex:0 0 var(--panel-w); min-width:320px; }
+  #editorCol { flex:1 1 100%; max-width:100%; min-width:500px; position: relative; }
+  #previewCol { flex:0 0 var(--panel-w); min-width:320px; display:none;}
   #editorHost, #codeHost { flex:1; min-height:520px; }
   #codeHost textarea { width:100%; height:100%; border:0; padding:12px; font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; outline:none; }
   #previewHead { padding:10px 12px; border-bottom:1px solid #e5e7eb; display:flex; gap:8px; align-items:center; }
