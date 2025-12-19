@@ -1,0 +1,93 @@
+{
+  "name": "Mozart",
+  "uri": "http://mozart.superabc.com.br/schema/bpmn",
+  "prefix": "mozart",
+  "xml": {
+    "tagAlias": "lowerCase"
+  },
+  "types": [
+    {
+      "name": "MozartUserTaskProps",
+      "extends": [
+        "bpmn:UserTask"
+      ],
+      "properties": [
+        {
+          "name": "name",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "description",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "category",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "assignmentType",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "assignmentValue",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "executionMode",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "formId",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "formMode",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "buttons",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "buttonMap",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "slaHours",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "slaEscalateTo",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "visibleTo",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "reopenAllowed",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "onComplete",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
+    }
+  ]
+}

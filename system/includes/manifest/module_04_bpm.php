@@ -18,9 +18,6 @@ return [
         'bpm:instancias:read'         => 'Ver instâncias',
         'bpm:instancias:operate'      => 'Operar instâncias (avançar, cancelar)',
 
-        // Formulários
-        'bpm:forms:manage'            => 'Gerenciar formulários BPM',
-
         // Decision / DMN
         'bpm:decision:manage'         => 'Gerenciar decisões (Decision)',
 
@@ -50,13 +47,8 @@ return [
                     ],
                     [
                         'label'    => 'Diagramas',
-                        'url'      => BASE_URL . '/modules/bpm/bpm_designer-listar.php',
+                        'url'      => BASE_URL . '/modules/bpm/processos-listar.php',
                         'requires' => ['bpm:processos:design'],
-                    ],
-                    [
-                        'label'    => 'Formulários',
-                        'url'      => BASE_URL . '/modules/bpm/forms/forms_designer.php',
-                        'requires' => ['bpm:forms:manage'],
                     ],
                     [
                         'label'    => 'Categorias',
@@ -98,7 +90,6 @@ return [
     'routes' => [
         [ 'path' => '/modules/bpm/wizard_bpm.php',             'requires' => ['bpm:processos:design'] ],
         [ 'path' => '/modules/bpm/bpm_designer-listar.php',    'requires' => ['bpm:processos:design'] ],
-        [ 'path' => '/modules/bpm/forms/forms_designer.php',   'requires' => ['bpm:forms:manage'] ],
         [ 'path' => '/modules/bpm/categorias_bpm_listar.php',  'requires' => ['bpm:processos:update'] ],
         [ 'path' => '/modules/bpm/decision_listar.php',        'requires' => ['bpm:decision:manage'] ],
         [ 'path' => '/modules/bpm/dataset_listar.php',         'requires' => ['bpm:datasets:manage'] ],
@@ -118,7 +109,6 @@ return [
             'bpm:processos:design',
             'bpm:processos:deploy',
             'bpm:processos:update',
-            'bpm:forms:manage',
             'bpm:decision:manage',
             'bpm:datasets:manage',
             'bpm:substitutos:manage',

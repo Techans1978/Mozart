@@ -1,31 +1,72 @@
 <?php
+// public/modules/bpm/api/task_complete.php
 header('Content-Type: application/json; charset=utf-8');
+
 require_once dirname(__DIR__, 3).'/config.php';
 require_once ROOT_PATH.'/system/config/autenticacao.php';
 require_once ROOT_PATH.'/system/config/connect.php';
-if (session_status()===PHP_SESSION_NONE) session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 proteger_pagina();
+
+require_once __DIR__ . '/../_lib/bpm_engine.php';
+
 $uid = (int)($_SESSION['user_id'] ?? 0);
+if ($uid <= 0) {
+    echo json_encode([
+        'ok'    => false,
+        'error' => 'Usuário não autenticado.'
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
 
-$id = (int)($_POST['id'] ?? 0);
-if ($id<=0 || $uid<=0) { echo json_encode(['ok'=>false,'error'=>'Parâmetros inválidos']); exit; }
+// Aceita JSON ou POST normal
+$raw = file_get_contents('php://input');
+$in  = json_decode($raw, true);
+if (!is_array($in)) {
+    $in = $_POST;
+}
 
-$conn->begin_transaction();
+// ID da tarefa
+$taskId = isset($in['id']) ? (int)$in['id'] : 0;
+if ($taskId <= 0) {
+    echo json_encode([
+        'ok'    => false,
+        'error' => 'Parâmetro "id" da tarefa é obrigatório.'
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+// Payload (dados do formulário)
+// Contrato preferido: { id: 123, payload: { campo1: "x", campo2: 10 } }
+$payload = [];
+if (isset($in['payload']) && is_array($in['payload'])) {
+    $payload = $in['payload'];
+} else {
+    // Fallback: tudo que não for 'id' entra como payload
+    foreach ($in as $k => $v) {
+        if ($k === 'id') continue;
+        $payload[$k] = $v;
+    }
+}
+
 try {
-  // conclui se o usuário é o assignee (ou se estiver aberto — para simplificar no MVP)
-  $q = "UPDATE bpm_task SET status='completed', finished_at=NOW()
-        WHERE id=$id AND (assignee_user_id=$uid OR assignee_user_id IS NULL)";
-  $conn->query($q);
-  if ($conn->affected_rows<=0) { throw new Exception('Você não pode concluir esta tarefa.'); }
+    $result = bpm_engine_advance_from_task($conn, $taskId, $uid, $payload);
 
-  // histórico
-  $conn->query("INSERT INTO bpm_event_log(instance_id,event_type,event_time,actor_user_id,data_json)
-                SELECT instance_id,'TASK_COMPLETED',NOW(),$uid,JSON_OBJECT('taskId',$id)
-                FROM bpm_task WHERE id=$id");
+    if (empty($result['ok'])) {
+        $msg = $result['error'] ?? 'Falha ao avançar tarefa.';
+        echo json_encode([
+            'ok'    => false,
+            'error' => $msg
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
 
-  $conn->commit();
-  echo json_encode(['ok'=>true]);
-} catch(Exception $e){
-  $conn->rollback();
-  echo json_encode(['ok'=>false,'error'=>$e->getMessage()]);
+    echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+} catch (Exception $e) {
+    echo json_encode([
+        'ok'    => false,
+        'error' => $e->getMessage()
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 }

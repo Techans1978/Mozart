@@ -1,0 +1,165 @@
+[
+  {
+    "name": "Mozart User Task v1",
+    "id": "mozart.usertask.v1",
+    "description": "Task humana padrão do Mozart (responsável, formulário, SLA, botões).",
+    "appliesTo": [
+      "bpmn:UserTask"
+    ],
+    "properties": [
+      {
+        "label": "Nome da etapa",
+        "type": "String",
+        "binding": {
+          "type": "property",
+          "name": "mozart:name"
+        }
+      },
+      {
+        "label": "Descrição / instruções",
+        "type": "Text",
+        "binding": {
+          "type": "property",
+          "name": "mozart:description"
+        }
+      },
+      {
+        "label": "Categoria",
+        "type": "String",
+        "binding": {
+          "type": "property",
+          "name": "mozart:category"
+        }
+      },
+
+      {
+        "label": "Tipo de atribuição",
+        "type": "Dropdown",
+        "choices": [
+          { "name": "Usuário específico", "value": "user" },
+          { "name": "Grupo", "value": "group" },
+          { "name": "Papel", "value": "role" },
+          { "name": "Perfil", "value": "profile" },
+          { "name": "Dinâmico (campo)", "value": "dynamic" }
+        ],
+        "binding": {
+          "type": "property",
+          "name": "mozart:assignmentType"
+        }
+      },
+      {
+        "label": "Valor (ID usuário/grupo/papel/campo)",
+        "type": "String",
+        "binding": {
+          "type": "property",
+          "name": "mozart:assignmentValue"
+        }
+      },
+      {
+        "label": "Modo de execução",
+        "type": "Dropdown",
+        "choices": [
+          { "name": "Um responsável", "value": "single" },
+          { "name": "Paralelo", "value": "parallel" },
+          { "name": "Maioria", "value": "majority" },
+          { "name": "Todos", "value": "all" }
+        ],
+        "binding": {
+          "type": "property",
+          "name": "mozart:executionMode"
+        }
+      },
+
+      {
+        "label": "Formulário (ID)",
+        "type": "String",
+        "description": "Por enquanto ID simples. Depois vira dropdown dinâmico.",
+        "binding": {
+          "type": "property",
+          "name": "mozart:formId"
+        }
+      },
+      {
+        "label": "Modo do formulário",
+        "type": "Dropdown",
+        "choices": [
+          { "name": "Leitura", "value": "readonly" },
+          { "name": "Leitura/Escrita", "value": "edit" },
+          { "name": "Atualiza campos específicos", "value": "partial" }
+        ],
+        "binding": {
+          "type": "property",
+          "name": "mozart:formMode"
+        }
+      },
+
+      {
+        "label": "Botões (lista)",
+        "type": "String",
+        "description": "Ex: aprovar,reprovar,devolver",
+        "binding": {
+          "type": "property",
+          "name": "mozart:buttons"
+        }
+      },
+      {
+        "label": "Mapa de botões → fluxos",
+        "type": "String",
+        "description": "Ex: aprovar:Flow_Aprovado,reprovar:Flow_Reprovado",
+        "binding": {
+          "type": "property",
+          "name": "mozart:buttonMap"
+        }
+      },
+
+      {
+        "label": "SLA (horas)",
+        "type": "String",
+        "binding": {
+          "type": "property",
+          "name": "mozart:slaHours"
+        }
+      },
+      {
+        "label": "Escalonar para",
+        "type": "String",
+        "binding": {
+          "type": "property",
+          "name": "mozart:slaEscalateTo"
+        }
+      },
+
+      {
+        "label": "Visível para (perfis/grupos)",
+        "type": "String",
+        "description": "Lista separada por vírgula",
+        "binding": {
+          "type": "property",
+          "name": "mozart:visibleTo"
+        }
+      },
+      {
+        "label": "Permitir reabrir?",
+        "type": "Dropdown",
+        "choices": [
+          { "name": "Não", "value": "false" },
+          { "name": "Sim", "value": "true" }
+        ],
+        "binding": {
+          "type": "property",
+          "name": "mozart:reopenAllowed"
+        }
+      },
+
+      {
+        "label": "Ação ao concluir (ID)",
+        "type": "String",
+        "description": "Ex: email_modelo_5 ou ação automatizada",
+        "binding": {
+          "type": "property",
+          "name": "mozart:onComplete"
+        }
+      }
+    ]
+  }
+]
