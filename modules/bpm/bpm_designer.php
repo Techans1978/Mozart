@@ -635,13 +635,20 @@ include_once ROOT_PATH . 'modules/bpm/includes/content_footer.php';
       alert('Erro ao inicializar o modeler: ' + (err?.message || err));
     });
 
+    async function saveAsDiagram() {
+      const base = prompt('Salvar como (código do processo):', currentFileName.replace(/\.bpmn$/i, ''));
+      if (!base) return;
+
+      currentFileName = base.endsWith('.bpmn') ? base : (base + '.bpmn');
+      return saveDiagram('draft');
+    }
 
     // ================== Toolbar / Ações ==================
     function bindToolbar(modeler) {
       bind('btnNew', async () => { await newDiagram(); renderMozartPanel(modeler, null); });
       bind('btnOpen', () => $('#fileOpen').click());
-      bind('btnSave', () => saveDiagram(false));
-      bind('btnSaveAs', () => saveDiagram(true));
+      bind('btnSave', () => saveDiagram('draft'));
+      bind('btnSaveAs', () => saveAsDiagram());
       bind('btnExportXML', () => exportXML());
       bind('btnExportSVG', () => exportSVG());
       bind('btnApplyTpl', () => applySelectedTemplate());
@@ -735,30 +742,6 @@ async function saveDiagram(status = 'draft') {
     });
 
     const data = await res.json();
-    if (!res.ok || !data.ok) throw new Error(data.error || 'save failed');
-
-    // backend passa a ser “dono” do versionamento
-    currentProcessId = data.process_id ?? currentProcessId;
-    currentVersionId = data.version_id ?? currentVersionId;
-    currentVersion   = data.version ?? currentVersion;
-
-    // só pra você ver no console e não se perder
-    console.log('Saved:', { currentProcessId, currentVersionId, currentVersion });
-
-    alert(status === 'published' ? '✅ Publicado!' : '✅ Salvo!');
-  } catch (err) {
-    console.error(err);
-    alert('❌ Erro ao salvar: ' + (err?.message || err));
-  }
-}
-
-// publish (usa o mesmo save, só muda status)
-async function publishDiagram() {
-  return saveDiagram('published');
-}
-
-
-    const data = await res.json();
     if (!data.ok) throw new Error(data.error || 'save failed');
 
     alert('✅ Salvo!');
@@ -801,8 +784,8 @@ async function publishDiagram() {
         const mod = e.ctrlKey || e.metaKey;
         if (mod && e.key.toLowerCase() === 's') {
           e.preventDefault();
-          if (e.shiftKey) saveDiagram(true);
-          else saveDiagram(false);
+          if (e.shiftKey) saveAsDiagram();
+          else saveDiagram('draft');
         }
         if (mod && e.key.toLowerCase() === 'o') {
           e.preventDefault();
