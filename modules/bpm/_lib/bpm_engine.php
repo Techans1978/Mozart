@@ -8,96 +8,84 @@ if (!function_exists('bpm_engine_load_bpmn')) {
      * =======================================================*/
 
     /**
-     * Salva payload vindo de formulário em bpm_variable.
-     * MVP: sempre insere novos registros (pode ter histórico).
+     * Detecta type para bpm_variable.
      */
-function bpm_engine_save_payload(mysqli $conn, int $instanceId, int $taskId, array $payload): void {
-    if (empty($payload)) return;
-
-    $sql = "INSERT INTO bpm_variable (instance_id, task_id, name, value, created_at)
-            VALUES (?, ?, ?, ?, NOW())";
-    $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        throw new Exception('Erro ao preparar insert bpm_variable: ' . $conn->error);
+    function bpm_engine_detect_var_type($val): string {
+        if (is_bool($val)) return 'boolean';
+        if (is_int($val) || is_float($val)) return 'number';
+        if (is_array($val) || is_object($val)) return 'json';
+        return 'string';
     }
 
-    foreach ($payload as $name => $val) {
-        if (is_array($val) || is_object($val)) {
-            $val = json_encode($val, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        }
-        $name = (string)$name;
-        $v    = (string)$val;
+    /**
+     * Salva payload vindo de formulário em bpm_variable.
+     * Schema do dump:
+     * - bpm_variable(instance_id, key, type, value_json, scope, updated_at)
+     * - UNIQUE(instance_id, key)
+     *
+     * MVP: UPSERT (mantém "último valor" por key)
+     * scope: process (taskId=0) | task (taskId>0)
+     */
+    function bpm_engine_save_payload(mysqli $conn, int $instanceId, int $taskId, array $payload): void {
+        if (empty($payload)) return;
 
-        $stmt->bind_param("iiss", $instanceId, $taskId, $name, $v);
-        $stmt->execute();
-    }
-    $stmt->close();
-}
+        $scope = ($taskId > 0) ? 'task' : 'process';
 
-
-$assigneeUserId = null;
-$candidateGroup = null;
-
-if ($req['assignment_type'] === 'user') {
-  $assigneeUserId = ctype_digit($req['assignment_value']) ? (int)$req['assignment_value'] : null;
-  if (!$assigneeUserId) throw new Exception("UserTask {$targetId}: user precisa ser user_id numérico");
-} else {
-  $candidateGroup = $req['assignment_value'];
-}
-
-$sql = "INSERT INTO bpm_task
-  (instance_id, node_id, type, assignee_user_id, candidate_group, form_slug, form_version, status, created_at)
-  VALUES (?, ?, 'user', ?, ?, ?, ?, 'ready', NOW())";
-
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("isisssi", $instanceId, $targetId, $assigneeUserId, $candidateGroup, $req['form_slug'], $req['form_version']);
-$stmt->execute();
-
-        $stmt = $conn->prepare($sql);
-        if (!$stmt) throw new Exception('Erro ao preparar insert bpm_task: ' . $conn->error);
-
-        $stmt->bind_param("isiss", $instanceId, $targetId, $assigneeUserId, $candidateGroup);
-        $stmt->execute();
-        $taskId = (int)$conn->insert_id;
-        $stmt->close();
-
-        $createdTasks[] = $taskId;
+        $sql = "INSERT INTO bpm_variable (instance_id, `key`, `type`, value_json, scope, updated_at)
+                VALUES (?, ?, ?, ?, ?, NOW())
+                ON DUPLICATE KEY UPDATE
+                  `type` = VALUES(`type`),
+                  value_json = VALUES(value_json),
+                  scope = VALUES(scope),
+                  updated_at = NOW()";
 
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
-            throw new Exception('Erro ao preparar insert bpm_variable: ' . $conn->error);
+            throw new Exception('Erro ao preparar upsert bpm_variable: ' . $conn->error);
         }
 
-        foreach ($payload as $name => $val) {
-            if (is_array($val) || is_object($val)) {
-                $val = json_encode($val, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            }
-            $name = (string)$name;
-            $v    = (string)$val;
+        foreach ($payload as $key => $val) {
+            $k = (string)$key;
+            $t = bpm_engine_detect_var_type($val);
 
-            $stmt->bind_param("iiss", $instanceId, $taskId, $name, $v);
+            // value_json é JSON no banco; armazenamos como json_encode (escalares também)
+            $vj = json_encode($val, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+            $stmt->bind_param("sssss", $instanceId, $k, $t, $vj, $scope);
             $stmt->execute();
         }
+
         $stmt->close();
     }
 
     /**
-     * Carrega todas as variáveis de uma instância para um array associativo.
-     * Em caso de chaves duplicadas, a última ganha (ordem por id).
+     * Carrega variáveis de uma instância para array associativo.
+     * - Prioriza scope='process' (MVP)
+     * - Para cada key, retorna valor já "decodado" do JSON quando possível.
      */
     function bpm_engine_load_vars(mysqli $conn, int $instanceId): array {
         $vars = [];
-        $sql = "SELECT name, value FROM bpm_variable WHERE instance_id = ? ORDER BY id ASC";
+
+        $sql = "SELECT `key`, `type`, value_json
+                FROM bpm_variable
+                WHERE instance_id = ? AND scope = 'process'
+                ORDER BY updated_at ASC";
+
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             return $vars;
         }
+
         $stmt->bind_param("i", $instanceId);
         $stmt->execute();
-        $stmt->bind_result($name, $value);
+        $stmt->bind_result($k, $t, $vj);
+
         while ($stmt->fetch()) {
-            $vars[$name] = $value;
+            $decoded = json_decode($vj, true);
+            // Se não decodificar (muito raro), cai no texto cru.
+            $vars[$k] = (json_last_error() === JSON_ERROR_NONE) ? $decoded : $vj;
         }
+
         $stmt->close();
         return $vars;
     }
@@ -107,14 +95,14 @@ $stmt->execute();
      * =======================================================*/
 
     /**
-     * Avalia uma expressão simples do tipo:
+     * Avalia expressão simples:
      * ${campo == 10}
      * ${status == 'APROVADO'}
      * ${total > 1000}
      *
      * - Só 1 condição (sem && ou ||)
-     * - Operadores suportados: ==, !=, >=, <=, >, <
-     * - campo é o nome da variável em bpm_variable (mesmo texto)
+     * - Operadores: ==, !=, >=, <=, >, <
+     * - campo é o nome da variável (key em bpm_variable)
      */
     function bpm_engine_eval_condition(?string $cond, array $vars): bool {
         if ($cond === null) return false;
@@ -134,6 +122,7 @@ $stmt->execute();
         $ops = ['==', '!=', '>=', '<=', '>', '<'];
         $opFound = null;
         $pos = null;
+
         foreach ($ops as $op) {
             $p = strpos($expr, $op);
             if ($p !== false) {
@@ -142,34 +131,37 @@ $stmt->execute();
                 break;
             }
         }
-        if ($opFound === null) {
-            return false;
-        }
 
-        $left = trim(substr($expr, 0, $pos));
+        if ($opFound === null) return false;
+
+        $left  = trim(substr($expr, 0, $pos));
         $right = trim(substr($expr, $pos + strlen($opFound)));
 
         if ($left === '') return false;
 
         $leftVal = $vars[$left] ?? null;
 
-        // trata right: string com aspas ou número
+        // Trata right: string com aspas ou número
         if ((str_starts_with($right, "'") && str_ends_with($right, "'")) ||
             (str_starts_with($right, '"') && str_ends_with($right, '"'))) {
             $rightVal = substr($right, 1, -1);
         } elseif (is_numeric($right)) {
-            $rightVal = $right + 0; // numérico
+            $rightVal = $right + 0;
         } else {
-            $rightVal = $right; // texto cru
+            $rightVal = $right;
         }
 
-        // tenta coerção numérica se ambos forem numéricos
+        // coerção numérica se ambos forem numéricos
         $isLeftNum = is_numeric($leftVal);
         $isRightNum = is_numeric($rightVal);
+
         if ($isLeftNum && $isRightNum) {
             $lv = $leftVal + 0;
             $rv = $rightVal + 0;
         } else {
+            // left pode vir como bool/array etc; forçamos string para comparação simples
+            if (is_bool($leftVal)) $leftVal = $leftVal ? 'true' : 'false';
+            if (is_array($leftVal) || is_object($leftVal)) $leftVal = json_encode($leftVal);
             $lv = (string)$leftVal;
             $rv = (string)$rightVal;
         }
@@ -182,13 +174,13 @@ $stmt->execute();
             case '>':  return $lv >  $rv;
             case '<':  return $lv <  $rv;
         }
+
         return false;
     }
 
     /**
      * Escolhe o fluxo de saída com base em conditionExpression.
-     * Regras:
-     * - Se alguma condição for TRUE → usa o primeiro TRUE.
+     * - Se alguma condição TRUE → usa o primeiro TRUE.
      * - Senão, se existir fluxo SEM condição → usa o primeiro sem condição.
      * - Senão, NULL.
      */
@@ -206,112 +198,118 @@ $stmt->execute();
                 $noCond[] = $f;
             }
         }
-        if (!empty($noCond)) {
-            return $noCond[0];
-        }
+
+        if (!empty($noCond)) return $noCond[0];
         return null;
     }
 
-/* =========================================================
- * Helpers FASE 3 — Humano x Automático (mozart:* + exec_kind)
- * =======================================================*/
+    /* =========================================================
+     * Helpers FASE 3 — Humano x Automático (mozart:* + exec_kind)
+     * =======================================================*/
 
-/**
- * Lê mozart:config="JSON" (namespace mozart) de um SimpleXMLElement.
- * Retorna array (vazio se não existir ou inválido).
- */
-function bpm_engine_read_mozart_config_from_xml(SimpleXMLElement $el): array {
-    $mozNs = 'http://mozart.superabc.com.br/schema/bpmn';
+    /**
+     * Lê mozart:config="JSON" (namespace mozart) de um SimpleXMLElement.
+     */
+    function bpm_engine_read_mozart_config_from_xml(SimpleXMLElement $el): array {
+        $mozNs = 'http://mozart.superabc.com.br/schema/bpmn';
 
-    // pega atributos no namespace mozart
-    $attrs = $el->attributes($mozNs, true);
-    if (!$attrs) return [];
+        $attrs = $el->attributes($mozNs, true);
+        if (!$attrs) return [];
 
-    $raw = (string)($attrs['config'] ?? '');
-    if ($raw === '') return [];
+        $raw = (string)($attrs['config'] ?? '');
+        if ($raw === '') return [];
 
-    $cfg = json_decode($raw, true);
-    return is_array($cfg) ? $cfg : [];
-}
-
-/**
- * Define o exec_kind oficial: human | service | gateway | event
- * Regra FASE 3:
- * - userTask => human
- * - serviceTask => service
- * - gateways => gateway
- * - *Event => event
- */
-function bpm_engine_node_exec_kind(string $bpmnType, array $mozCfg = []): string {
-    // override opcional futuro via config
-    if (!empty($mozCfg['execKind'])) {
-        $k = strtolower(trim((string)$mozCfg['execKind']));
-        if (in_array($k, ['human','service','gateway','event'], true)) return $k;
+        $cfg = json_decode($raw, true);
+        return is_array($cfg) ? $cfg : [];
     }
 
-    if ($bpmnType === 'userTask') return 'human';
+    /**
+     * Define exec_kind oficial: human | service | gateway | event
+     */
+    function bpm_engine_node_exec_kind(string $bpmnType, array $mozCfg = []): string {
+        if (!empty($mozCfg['execKind'])) {
+            $k = strtolower(trim((string)$mozCfg['execKind']));
+            if (in_array($k, ['human','service','gateway','event'], true)) return $k;
+        }
 
-    if (in_array($bpmnType, ['serviceTask'], true)) return 'service';
+        if ($bpmnType === 'userTask') return 'human';
+        if (in_array($bpmnType, ['serviceTask'], true)) return 'service';
+        if (in_array($bpmnType, ['exclusiveGateway','parallelGateway'], true)) return 'gateway';
+        if (substr($bpmnType, -5) === 'Event') return 'event';
 
-    if (in_array($bpmnType, ['exclusiveGateway','parallelGateway'], true)) return 'gateway';
-
-    if (substr($bpmnType, -5) === 'Event') return 'event';
-
-    // conservador: nunca gerar task
-    return 'event';
-}
-
-/**
- * Extrai requisitos de tarefa humana:
- * - form_id
- * - assignment_type (user|role)
- * - assignment_value
- *
- * Fonte (ordem):
- * 1) atributos mozart:* no XML
- * 2) mozart:config JSON (assignment/form)
- */
-function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el): array {
-    $mozNs = 'http://mozart.superabc.com.br/schema/bpmn';
-    $a = $el->attributes($mozNs, true);
-
-    $formSlug = $a ? trim((string)($a['formSlug'] ?? '')) : '';
-    $formVer  = $a ? trim((string)($a['formVersion'] ?? '')) : '';
-
-    $atype  = $a ? strtolower(trim((string)($a['assignmentType'] ?? ''))) : '';
-    $aval   = $a ? trim((string)($a['assignmentValue'] ?? '')) : '';
-
-    // fallback via config JSON
-    if ($formSlug === '') {
-        $formSlug = trim((string)($mozCfg['formSlug'] ?? ($mozCfg['form']['slug'] ?? '')));
-    }
-    if ($formVer === '') {
-        $formVer = trim((string)($mozCfg['formVersion'] ?? ($mozCfg['form']['version'] ?? '')));
+        return 'event';
     }
 
-    if ($atype === '') {
-        $atype = strtolower(trim((string)($mozCfg['assignment']['type'] ?? ($mozCfg['assigneeType'] ?? ''))));
+    /**
+     * Extrai requisitos de tarefa humana:
+     * - form_slug
+     * - form_version
+     * - assignment_type (user|role)
+     * - assignment_value
+     *
+     * Fonte:
+     * 1) atributos mozart:* no XML
+     * 2) mozart:config JSON
+     */
+    function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el): array {
+        $mozNs = 'http://mozart.superabc.com.br/schema/bpmn';
+        $a = $el->attributes($mozNs, true);
+
+        $formSlug = $a ? trim((string)($a['formSlug'] ?? '')) : '';
+        $formVer  = $a ? trim((string)($a['formVersion'] ?? '')) : '';
+
+        $atype  = $a ? strtolower(trim((string)($a['assignmentType'] ?? ''))) : '';
+        $aval   = $a ? trim((string)($a['assignmentValue'] ?? '')) : '';
+
+        // fallback via config JSON
+        if ($formSlug === '') {
+            $formSlug = trim((string)($mozCfg['formSlug'] ?? ($mozCfg['form']['slug'] ?? '')));
+        }
+        if ($formVer === '') {
+            $formVer = trim((string)($mozCfg['formVersion'] ?? ($mozCfg['form']['version'] ?? '')));
+        }
+
+        if ($atype === '') {
+            $atype = strtolower(trim((string)($mozCfg['assignment']['type'] ?? ($mozCfg['assigneeType'] ?? ''))));
+        }
+        if ($aval === '') {
+            $aval = trim((string)($mozCfg['assignment']['value'] ?? ($mozCfg['assignee'] ?? '')));
+        }
+
+        return [
+            'form_slug'        => $formSlug ?: null,
+            'form_version'     => (ctype_digit($formVer) ? (int)$formVer : null),
+            'assignment_type'  => $atype ?: null,
+            'assignment_value' => $aval ?: null,
+        ];
     }
-    if ($aval === '') {
-        $aval = trim((string)($mozCfg['assignment']['value'] ?? ($mozCfg['assignee'] ?? '')));
-    }
-
-    return [
-        'form_slug'        => $formSlug ?: null,
-        'form_version'     => (ctype_digit($formVer) ? (int)$formVer : null),
-        'assignment_type'  => $atype ?: null,
-        'assignment_value' => $aval ?: null,
-    ];
-}
-
-
 
     /* =========================================================
      * BPMN: carregar XML e indexar
      * =======================================================*/
 
+    /**
+     * Carrega BPMN XML por versionId.
+     * - 1) tenta bpm_process_version (novo schema)
+     * - 2) fallback bpm_processes (legacy)
+     */
     function bpm_engine_load_bpmn(mysqli $conn, int $versionId): string {
-        $sql = "SELECT bpmn_xml FROM bpm_processes WHERE id = ?";
+        // 1) novo schema
+        $sql = "SELECT bpmn_xml FROM bpm_process_version WHERE id = ? LIMIT 1";
+        $stmt = $conn->prepare($sql);
+        if ($stmt) {
+            $stmt->bind_param("i", $versionId);
+            $stmt->execute();
+            $stmt->bind_result($bpmn);
+            if ($stmt->fetch() && $bpmn) {
+                $stmt->close();
+                return $bpmn;
+            }
+            $stmt->close();
+        }
+
+        // 2) legacy
+        $sql = "SELECT bpmn_xml FROM bpm_processes WHERE id = ? LIMIT 1";
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             throw new Exception('Erro ao preparar consulta BPMN: ' . $conn->error);
@@ -348,40 +346,48 @@ function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el):
 
         $nodes = [];
         $types = ['startEvent','endEvent','userTask','serviceTask','exclusiveGateway','parallelGateway'];
+
         foreach ($types as $t) {
             $els = $process->xpath("bpmn:$t");
             if (!$els) continue;
+
             foreach ($els as $el) {
                 $id = (string)$el['id'];
                 if (!$id) continue;
+
                 $mozCfg = bpm_engine_read_mozart_config_from_xml($el);
+
                 $nodes[$id] = [
-                'id'        => $id,
-                'type'      => $t,
-                'xml'       => $el,
-                'mozart'    => $mozCfg,
-                'exec_kind' => bpm_engine_node_exec_kind($t, $mozCfg),
+                    'id'        => $id,
+                    'type'      => $t,
+                    'xml'       => $el,
+                    'mozart'    => $mozCfg,
+                    'exec_kind' => bpm_engine_node_exec_kind($t, $mozCfg),
                 ];
             }
         }
 
         $flowsBySource = [];
         $flows = $process->xpath('bpmn:sequenceFlow') ?: [];
+
         foreach ($flows as $sf) {
             $fid    = (string)$sf['id'];
             $source = (string)$sf['sourceRef'];
             $target = (string)$sf['targetRef'];
+
             $condText = null;
             $conds = $sf->xpath('bpmn:conditionExpression');
             if ($conds && isset($conds[0])) {
                 $condText = trim((string)$conds[0]);
             }
+
             $rec = [
                 'id'        => $fid,
                 'source'    => $source,
                 'target'    => $target,
                 'condition' => $condText,
             ];
+
             if (!isset($flowsBySource[$source])) $flowsBySource[$source] = [];
             $flowsBySource[$source][] = $rec;
         }
@@ -414,9 +420,8 @@ function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el):
 
         $flows = $flowsBySource[$fromNodeId];
         $flow  = bpm_engine_choose_flow($flows, $varsRuntime);
-        if (!$flow) {
-            return;
-        }
+
+        if (!$flow) return;
 
         $targetId = $flow['target'] ?? null;
         if (!$targetId || !isset($nodes[$targetId])) {
@@ -427,85 +432,78 @@ function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el):
         $type   = $target['type'];
 
         switch ($type) {
+
             case 'userTask':
-    // FASE 3/4 — runtime estrito
-    $execKind = $target['exec_kind'] ?? 'human';
-    if ($execKind !== 'human') {
-        throw new Exception("FASE 3: userTask {$targetId} não pode executar como {$execKind}");
-    }
+                // FASE 3/4 — runtime estrito
+                $execKind = $target['exec_kind'] ?? 'human';
+                if ($execKind !== 'human') {
+                    throw new Exception("FASE 3: userTask {$targetId} não pode executar como {$execKind}");
+                }
 
-    $req = bpm_engine_get_human_requirements($target['mozart'] ?? [], $target['xml']);
+                $req = bpm_engine_get_human_requirements($target['mozart'] ?? [], $target['xml']);
 
-    // FASE 4 — humano exige form_slug + form_version
-    if (empty($req['form_slug']) || empty($req['form_version'])) {
-        throw new Exception(
-            "FASE 4: UserTask {$targetId} sem form_slug/form_version (publish deveria congelar)"
-        );
-    }
+                // FASE 4 — humano exige form_slug + form_version
+                if (empty($req['form_slug']) || empty($req['form_version'])) {
+                    throw new Exception(
+                        "FASE 4: UserTask {$targetId} sem form_slug/form_version (publish deveria congelar)"
+                    );
+                }
 
-    // FASE 3 — humano exige assignment
-    if (!in_array($req['assignment_type'], ['user','role'], true) || empty($req['assignment_value'])) {
-        throw new Exception(
-            "FASE 3: UserTask {$targetId} sem assignment (user|role + valor)"
-        );
-    }
+                // FASE 3 — humano exige assignment
+                if (!in_array($req['assignment_type'], ['user','role'], true) || empty($req['assignment_value'])) {
+                    throw new Exception(
+                        "FASE 3: UserTask {$targetId} sem assignment (user|role + valor)"
+                    );
+                }
 
-    $assigneeUserId = null;
-    $candidateGroup = null;
+                $assigneeUserId = null;
+                $candidateGroup = null;
 
-    if ($req['assignment_type'] === 'user') {
-        $assigneeUserId = ctype_digit($req['assignment_value'])
-            ? (int)$req['assignment_value']
-            : null;
+                if ($req['assignment_type'] === 'user') {
+                    $assigneeUserId = ctype_digit($req['assignment_value'])
+                        ? (int)$req['assignment_value']
+                        : null;
 
-        if (!$assigneeUserId) {
-            throw new Exception(
-                "UserTask {$targetId}: assignment user precisa ser user_id numérico"
-            );
-        }
-    } else {
-        // role
-        $candidateGroup = $req['assignment_value'];
-    }
+                    if (!$assigneeUserId) {
+                        throw new Exception("UserTask {$targetId}: assignment user precisa ser user_id numérico");
+                    }
+                } else {
+                    $candidateGroup = $req['assignment_value'];
+                }
 
-    // ✅ INSERT ÚNICO E FINAL
-    $sql = "
-        INSERT INTO bpm_task
-          (instance_id, node_id, type,
-           assignee_user_id, candidate_group,
-           form_slug, form_version,
-           status, created_at)
-        VALUES
-          (?, ?, 'user',
-           ?, ?,
-           ?, ?,
-           'ready', NOW())
-    ";
+                // INSERT único e final (corrigido)
+                $sql = "INSERT INTO bpm_task
+                          (instance_id, node_id, type,
+                           assignee_user_id, candidate_group,
+                           form_slug, form_version,
+                           status, created_at)
+                        VALUES
+                          (?, ?, 'user',
+                           ?, ?,
+                           ?, ?,
+                           'ready', NOW())";
 
-    $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        throw new Exception('Erro ao preparar insert bpm_task: ' . $conn->error);
-    }
+                $stmt = $conn->prepare($sql);
+                if (!$stmt) {
+                    throw new Exception('Erro ao preparar insert bpm_task: ' . $conn->error);
+                }
 
-    $stmt->bind_param(
-        "isisssi",
-        $instanceId,
-        $targetId,
-        $assigneeUserId,
-        $candidateGroup,
-        $req['form_slug'],
-        $req['form_version']
-    );
+                $stmt->bind_param(
+                    "isisssi",
+                    $instanceId,
+                    $targetId,
+                    $assigneeUserId,
+                    $candidateGroup,
+                    $req['form_slug'],
+                    $req['form_version']
+                );
 
-    $stmt->execute();
-    $taskId = (int)$conn->insert_id;
-    $stmt->close();
+                $stmt->execute();
+                $taskId = (int)$conn->insert_id;
+                $stmt->close();
 
-    $createdTasks[] = $taskId;
-    break;
-
-
-
+                $createdTasks[] = $taskId;
+                break;
 
             case 'endEvent':
                 $sql = "UPDATE bpm_instance
@@ -522,20 +520,24 @@ function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el):
                 break;
 
             default:
-    // FASE 3: gateway/event nunca geram task (aqui só atravessa)
-    // FASE 3: se alguém tentar marcar service como human (ou vice-versa), trava
-    $execKind = $target['exec_kind'] ?? null;
-    if ($type === 'serviceTask' && $execKind && $execKind !== 'service') {
-        throw new Exception("FASE 3: serviceTask {$targetId} com exec_kind inválido: {$execKind}");
-    }
-    if (in_array($type, ['exclusiveGateway','parallelGateway','startEvent','endEvent'], true) && $execKind && !in_array($execKind, ['gateway','event'], true)) {
-        throw new Exception("FASE 3: {$type} {$targetId} com exec_kind inválido: {$execKind}");
-    }
+                // FASE 3: gateway/event nunca geram task (aqui só atravessa)
+                $execKind = $target['exec_kind'] ?? null;
 
-    // serviceTask, gateways etc. — atravessa
-    bpm_engine_walk($conn, $instanceId, $nodes, $flowsBySource, $targetId, $createdTasks, $visited, $varsRuntime);
-    break;
+                if ($type === 'serviceTask' && $execKind && $execKind !== 'service') {
+                    throw new Exception("FASE 3: serviceTask {$targetId} com exec_kind inválido: {$execKind}");
+                }
 
+                if (in_array($type, ['exclusiveGateway','parallelGateway','startEvent','endEvent'], true)
+                    && $execKind && !in_array($execKind, ['gateway','event'], true)) {
+                    throw new Exception("FASE 3: {$type} {$targetId} com exec_kind inválido: {$execKind}");
+                }
+
+                // serviceTask, gateways etc. — atravessa (MVP)
+                bpm_engine_walk(
+                    $conn, $instanceId, $nodes, $flowsBySource,
+                    $targetId, $createdTasks, $visited, $varsRuntime
+                );
+                break;
         }
     }
 
@@ -551,25 +553,52 @@ function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el):
         ?string $businessKey = null,
         array $vars = []
     ): array {
-        // 1) Carrega processo
-        $sql = "SELECT id, bpmn_xml FROM bpm_processes WHERE name = ? AND version = ? LIMIT 1";
-        $stmt = $conn->prepare($sql);
-        if (!$stmt) {
-            throw new Exception('Erro ao preparar consulta processo: ' . $conn->error);
-        }
-        $stmt->bind_param("si", $name, $version);
-        $stmt->execute();
-        $stmt->bind_result($procId, $bpmn);
-        if (!$stmt->fetch() || !$bpmn) {
-            $stmt->close();
-            throw new Exception("Processo não encontrado: {$name} v{$version}");
-        }
-        $stmt->close();
 
-        // 2) Índice do BPMN
+        $procId = null;
+        $bpmn = null;
+
+        // 1) tenta novo schema (bpm_process + bpm_process_version)
+        $sql = "SELECT v.id, v.bpmn_xml
+                FROM bpm_process p
+                JOIN bpm_process_version v ON v.process_id = p.id
+                WHERE p.name = ? AND v.version = ?
+                ORDER BY v.id DESC
+                LIMIT 1";
+        $stmt = $conn->prepare($sql);
+        if ($stmt) {
+            $stmt->bind_param("si", $name, $version);
+            $stmt->execute();
+            $stmt->bind_result($procId, $bpmn);
+            if ($stmt->fetch() && $bpmn) {
+                $stmt->close();
+            } else {
+                $stmt->close();
+                $procId = null;
+                $bpmn = null;
+            }
+        }
+
+        // 2) fallback legacy (bpm_processes)
+        if (!$bpmn) {
+            $sql = "SELECT id, bpmn_xml FROM bpm_processes WHERE name = ? AND version = ? LIMIT 1";
+            $stmt = $conn->prepare($sql);
+            if (!$stmt) {
+                throw new Exception('Erro ao preparar consulta processo: ' . $conn->error);
+            }
+            $stmt->bind_param("si", $name, $version);
+            $stmt->execute();
+            $stmt->bind_result($procId, $bpmn);
+            if (!$stmt->fetch() || !$bpmn) {
+                $stmt->close();
+                throw new Exception("Processo não encontrado: {$name} v{$version}");
+            }
+            $stmt->close();
+        }
+
+        // 3) Índice do BPMN
         [$nodes, $flowsBySource] = bpm_engine_build_index($bpmn);
 
-        // 3) StartEvent
+        // 4) StartEvent
         $startNodeId = null;
         foreach ($nodes as $id => $n) {
             if ($n['type'] === 'startEvent') { $startNodeId = $id; break; }
@@ -578,7 +607,7 @@ function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el):
             throw new Exception('StartEvent não encontrado no diagrama.');
         }
 
-        // 4) Cria instância
+        // 5) Cria instância
         $varsJson = !empty($vars)
             ? json_encode($vars, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
             : null;
@@ -589,13 +618,15 @@ function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el):
         if (!$stmt) {
             throw new Exception('Erro ao preparar insert bpm_instance: ' . $conn->error);
         }
+
         $bk = $businessKey ?: null;
+        // version_id = $procId (que no novo schema é id da bpm_process_version; no legacy é id da bpm_processes)
         $stmt->bind_param("isis", $procId, $bk, $starterUserId, $varsJson);
         $stmt->execute();
         $instanceId = (int)$conn->insert_id;
         $stmt->close();
 
-        // 5) Log de início
+        // 6) Log de início
         if ($instanceId > 0) {
             $etype = 'INSTANCE_STARTED';
             $dataJson = json_encode([
@@ -614,15 +645,16 @@ function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el):
             }
         }
 
-        // 6) Salva payload inicial em bpm_variable
+        // 7) Salva payload inicial em bpm_variable
         if (!empty($vars)) {
             bpm_engine_save_payload($conn, $instanceId, 0, $vars);
         }
 
-        // 7) Caminha a partir do startEvent
+        // 8) Caminha a partir do startEvent
         $createdTasks = [];
         $visited = [];
         $varsRuntime = $vars; // já temos em memória
+
         bpm_engine_walk($conn, $instanceId, $nodes, $flowsBySource, $startNodeId, $createdTasks, $visited, $varsRuntime);
 
         return [
@@ -639,6 +671,7 @@ function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el):
 
     function bpm_engine_advance_from_task(mysqli $conn, int $taskId, int $actorUserId, array $payload = []): array {
         $conn->begin_transaction();
+
         try {
             // 1) Busca task + instance + versão
             $sql = "SELECT t.id, t.instance_id, t.node_id, t.status, i.version_id
@@ -650,9 +683,11 @@ function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el):
             if (!$stmt) {
                 throw new Exception('Erro ao preparar select task: ' . $conn->error);
             }
+
             $stmt->bind_param("i", $taskId);
             $stmt->execute();
             $stmt->bind_result($id, $instanceId, $nodeId, $status, $versionId);
+
             if (!$stmt->fetch()) {
                 $stmt->close();
                 throw new Exception('Tarefa não encontrada.');
@@ -673,8 +708,10 @@ function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el):
             if (!$stmt) {
                 throw new Exception('Erro ao preparar update bpm_task: ' . $conn->error);
             }
+
             $stmt->bind_param("i", $taskId);
             $stmt->execute();
+
             if ($stmt->affected_rows <= 0) {
                 $stmt->close();
                 throw new Exception('Não foi possível concluir a tarefa (talvez já concluída?).');
@@ -686,9 +723,8 @@ function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el):
                 bpm_engine_save_payload($conn, (int)$instanceId, $taskId, $payload);
             }
 
-            // 4) Carrega todas as variáveis da instância
+            // 4) Carrega variáveis persistidas + sobrepõe payload (mais recente)
             $varsPersistidas = bpm_engine_load_vars($conn, (int)$instanceId);
-            // payload mais recente tem prioridade
             $varsRuntime = array_merge($varsPersistidas, $payload);
 
             // 5) Log de conclusão
@@ -697,6 +733,7 @@ function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el):
                 'taskId'  => $taskId,
                 'payload' => $payload
             ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
             $sql = "INSERT INTO bpm_event_log (instance_id, version_id, event_type, event_time, actor_user_id, data_json)
                     VALUES (?, ?, ?, NOW(), ?, ?)";
             $stmt = $conn->prepare($sql);
@@ -712,15 +749,18 @@ function bpm_engine_get_human_requirements(array $mozCfg, SimpleXMLElement $el):
 
             $createdTasks = [];
             $visited = [];
+
             bpm_engine_walk($conn, (int)$instanceId, $nodes, $flowsBySource, (string)$nodeId, $createdTasks, $visited, $varsRuntime);
 
             $conn->commit();
+
             return [
                 'ok'            => true,
                 'instance_id'   => (int)$instanceId,
                 'version_id'    => (int)$versionId,
                 'created_tasks' => $createdTasks,
             ];
+
         } catch (Exception $e) {
             $conn->rollback();
             return ['ok'=>false, 'error'=>$e->getMessage()];

@@ -14,6 +14,7 @@ require_once __DIR__ . '/../_lib/bpm_engine.php';
 
 $uid = (int)($_SESSION['user_id'] ?? 0);
 if ($uid <= 0) {
+    http_response_code(401);
     echo json_encode([
         'ok'    => false,
         'error' => 'Usuário não autenticado.'
@@ -31,6 +32,7 @@ if (!is_array($in)) {
 // ID da tarefa
 $taskId = isset($in['id']) ? (int)$in['id'] : 0;
 if ($taskId <= 0) {
+    http_response_code(400);
     echo json_encode([
         'ok'    => false,
         'error' => 'Parâmetro "id" da tarefa é obrigatório.'
@@ -41,8 +43,15 @@ if ($taskId <= 0) {
 // Payload (dados do formulário)
 // Contrato preferido: { id: 123, payload: { campo1: "x", campo2: 10 } }
 $payload = [];
-if (isset($in['payload']) && is_array($in['payload'])) {
-    $payload = $in['payload'];
+
+if (isset($in['payload'])) {
+    if (is_array($in['payload'])) {
+        $payload = $in['payload'];
+    } elseif (is_string($in['payload']) && trim($in['payload']) !== '') {
+        // aceita payload vindo como JSON string
+        $tmp = json_decode($in['payload'], true);
+        if (is_array($tmp)) $payload = $tmp;
+    }
 } else {
     // Fallback: tudo que não for 'id' entra como payload
     foreach ($in as $k => $v) {
@@ -56,6 +65,7 @@ try {
 
     if (empty($result['ok'])) {
         $msg = $result['error'] ?? 'Falha ao avançar tarefa.';
+        http_response_code(400);
         echo json_encode([
             'ok'    => false,
             'error' => $msg
@@ -64,9 +74,13 @@ try {
     }
 
     echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+
 } catch (Exception $e) {
+    http_response_code(500);
     echo json_encode([
         'ok'    => false,
         'error' => $e->getMessage()
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
 }

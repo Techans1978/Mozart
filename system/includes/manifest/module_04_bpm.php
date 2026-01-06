@@ -38,7 +38,7 @@ return [
         'back' => [
             [
                 'label' => 'BPM / Processos',
-                'icon'  => 'fa fa-tasks', // ou 'ti ti-flowchart' se preferir Tabler
+                'icon'  => 'fa fa-tasks',
                 'children' => [
                     [
                         'label'    => 'Wizard BPM',
@@ -88,14 +88,23 @@ return [
 
     // === Rotas para RBAC (usa SCRIPT_NAME, sem BASE_URL) ===
     'routes' => [
+        // UI
         [ 'path' => '/modules/bpm/wizard_bpm.php',             'requires' => ['bpm:processos:design'] ],
+        [ 'path' => '/modules/bpm/processos-listar.php',       'requires' => ['bpm:processos:design'] ],
+
+        // (mantém caso exista no projeto)
         [ 'path' => '/modules/bpm/bpm_designer-listar.php',    'requires' => ['bpm:processos:design'] ],
+
         [ 'path' => '/modules/bpm/categorias_bpm_listar.php',  'requires' => ['bpm:processos:update'] ],
         [ 'path' => '/modules/bpm/decision_listar.php',        'requires' => ['bpm:decision:manage'] ],
         [ 'path' => '/modules/bpm/dataset_listar.php',         'requires' => ['bpm:datasets:manage'] ],
         [ 'path' => '/modules/bpm/substitutos_listar.php',     'requires' => ['bpm:substitutos:manage'] ],
         [ 'path' => '/modules/bpm/tranfpendencias_listar.php', 'requires' => ['bpm:pendencias:transfer'] ],
         [ 'path' => '/modules/bpm/addcode_listar.php',         'requires' => ['bpm:addcode:manage'] ],
+
+        // API (Fase 6 Runtime MVP)
+        [ 'path' => '/modules/bpm/api/instance_start.php',     'requires' => ['bpm:instancias:operate'] ],
+        [ 'path' => '/modules/bpm/api/task_complete.php',      'requires' => ['bpm:instancias:operate'] ],
     ],
 
     // === Perfis padrão ===
@@ -119,7 +128,6 @@ return [
         'operador_bpm'    => [
             'bpm:instancias:read',
             'bpm:instancias:operate',
-            // se quiser que operador veja datasets/decision, dá pra incluir aqui depois
         ],
     ],
 ];
