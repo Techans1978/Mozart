@@ -170,8 +170,46 @@ try {
   $stmt->close();
   // ===== /FASE 3/4 =====
 
+// ✅ FASE 5: garante xml do asset e checksum/size
+$stmt = $conn->prepare("SELECT content_text FROM bpm_bpmn_asset WHERE version_id=? AND type='bpmn_xml' ORDER BY id DESC LIMIT 1");
+$stmt->bind_param("i", $curVerId);
+$stmt->execute();
+$row = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+$xmlAsset = $row['content_text'] ?? '';
+
+// fallback legado
+if (!$xmlAsset) {
+  $stmt = $conn->prepare("SELECT bpmn_xml FROM bpm_process_version WHERE id=? LIMIT 1");
+  $stmt->bind_param("i", $curVerId);
+  $stmt->execute();
+  $xmlAsset = $stmt->get_result()->fetch_assoc()['bpmn_xml'] ?? '';
+  $stmt->close();
+
+  if (!$xmlAsset) throw new Exception("xml não encontrado para version_id={$curVerId}");
+
+  // cria asset se estava só no campo antigo
+  $sha1 = sha1($xmlAsset);
+  $stmt = $conn->prepare("INSERT INTO bpm_bpmn_asset (version_id, type, content_text, content_blob, hash_sha1) VALUES (?, 'bpmn_xml', ?, NULL, ?)");
+  $stmt->bind_param("iss", $curVerId, $xmlAsset, $sha1);
+  $stmt->execute();
+  $stmt->close();
+}
+
+$xmlAsset = preg_replace('/^\xEF\xBB\xBF/', '', $xmlAsset);
+$sizeBytes = strlen($xmlAsset);
+$sha1 = sha1($xmlAsset);
+
+// grava checksum/size (oficial)
+$stmt = $conn->prepare("UPDATE bpm_process_version SET checksum_sha1=?, size_bytes=? WHERE id=?");
+$stmt->bind_param("sii", $sha1, $sizeBytes, $curVerId);
+$stmt->execute();
+$stmt->close();
+
+
   // publica a versão atual
-  $stmt = $conn->prepare("UPDATE bpm_process_version SET status='published', updated_at=NOW() WHERE id=?");
+  $stmt = $conn->prepare("UPDATE bpm_process_version SET status='published', published_at=NOW(), updated_at=NOW() WHERE id=?");
   $stmt->bind_param("i", $curVerId);
   $stmt->execute();
   $stmt->close();

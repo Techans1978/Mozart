@@ -1,52 +1,65 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-require_once dirname(__DIR__, 2) . '/config/connect.php';
+require_once dirname(__DIR__, 2) . '/config/connect.php'; // $conn
 
-$processId = isset($_GET['process_id']) ? (int) $_GET['process_id'] : 0;
-$version = isset($_GET['version']) ? max(1, (int) $_GET['version']) : 0;
+$in = json_decode(file_get_contents('php://input'), true);
+$code = isset($in['code']) ? preg_replace('/[^a-zA-Z0-9_\-]/', '_', $in['code']) : '';
+$version = isset($in['version']) && $in['version'] ? (int)$in['version'] : 0;
 
-if (!$processId) {
-  http_response_code(400);
-  echo json_encode(['error' => 'process_id required']);
-  exit;
-}
+if (!$code) { http_response_code(400); echo json_encode(['ok'=>false,'error'=>'missing code']); exit; }
 
-if ($version > 0) {
-  $stmt = $conn->prepare("
-    SELECT v.id, v.version, v.status, v.bpmn_xml, v.snapshot_json
-    FROM bpm_process_version v
-    WHERE v.process_id = ? AND v.version = ?
-    LIMIT 1
-  ");
-  $stmt->bind_param("ii", $processId, $version);
-} else {
-  $stmt = $conn->prepare("
-    SELECT v.id, v.version, v.status, v.bpmn_xml, v.snapshot_json
-    FROM bpm_process p
-    JOIN bpm_process_version v ON v.id = p.current_version_id
-    WHERE p.id = ?
-    LIMIT 1
-  ");
-  $stmt->bind_param("i", $processId);
-}
-
+$stmt = $conn->prepare("SELECT id, code, name, current_version_id FROM bpm_process WHERE code=? LIMIT 1");
+$stmt->bind_param("s", $code);
 $stmt->execute();
-$res = $stmt->get_result();
-$row = $res->fetch_assoc();
+$proc = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-if (!$row) {
-  http_response_code(404);
-  echo json_encode(['error' => 'not found']);
-  exit;
+if (!$proc) { http_response_code(404); echo json_encode(['ok'=>false,'error'=>'process not found']); exit; }
+
+$processId = (int)$proc['id'];
+
+if ($version > 0) {
+  $stmt = $conn->prepare("SELECT id, version, status FROM bpm_process_version WHERE process_id=? AND version=? ORDER BY id DESC LIMIT 1");
+  $stmt->bind_param("ii", $processId, $version);
+} else {
+  $stmt = $conn->prepare("SELECT id, version, status FROM bpm_process_version WHERE id=? LIMIT 1");
+  $vId = (int)$proc['current_version_id'];
+  $stmt->bind_param("i", $vId);
 }
+$stmt->execute();
+$ver = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if (!$ver) { http_response_code(404); echo json_encode(['ok'=>false,'error'=>'version not found']); exit; }
+
+$versionId = (int)$ver['id'];
+
+// ✅ FASE 5: busca XML do asset
+$stmt = $conn->prepare("SELECT content_text FROM bpm_bpmn_asset WHERE version_id=? AND type='bpmn_xml' ORDER BY id DESC LIMIT 1");
+$stmt->bind_param("i", $versionId);
+$stmt->execute();
+$row = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+$xml = $row['content_text'] ?? '';
+if (!$xml) {
+  // fallback opcional: se existir legado em bpmn_xml
+  $stmt = $conn->prepare("SELECT bpmn_xml FROM bpm_process_version WHERE id=? LIMIT 1");
+  $stmt->bind_param("i", $versionId);
+  $stmt->execute();
+  $xml = $stmt->get_result()->fetch_assoc()['bpmn_xml'] ?? '';
+  $stmt->close();
+}
+
+if (!$xml) { http_response_code(500); echo json_encode(['ok'=>false,'error'=>'xml not found (asset missing)']); exit; }
 
 echo json_encode([
   'ok' => true,
   'process_id' => $processId,
-  'version_id' => (int) $row['id'],
-  'version' => (int) $row['version'],
-  'status' => $row['status'],
-  'xml' => $row['bpmn_xml'],
-  'snapshot' => $row['snapshot_json'] ? json_decode($row['snapshot_json'], true) : null
-], JSON_UNESCAPED_UNICODE);
+  'code' => $proc['code'],
+  'name' => $proc['name'],
+  'version_id' => $versionId,
+  'version' => (int)$ver['version'],
+  'status' => $ver['status'],
+  'xml' => $xml
+], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
