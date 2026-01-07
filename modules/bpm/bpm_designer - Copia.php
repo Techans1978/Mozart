@@ -17,6 +17,8 @@ include_once ROOT_PATH . 'system/includes/head.php';
 include_once ROOT_PATH . 'modules/bpm/includes/content_header.php';
 include_once ROOT_PATH . 'modules/bpm/includes/content_style.php';
 
+// (se o seu navbar ficar dentro do head/footer, não precisa incluir aqui)
+include_once ROOT_PATH . 'system/includes/navbar.php';
 ?>
 
 <!-- ===== Estilos locais desta tela ===== -->
@@ -221,7 +223,16 @@ include_once ROOT_PATH . 'modules/bpm/includes/content_style.php';
 </style>
 
 <!-- Page Content -->
+<div id="page-wrapper">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-lg-12">
+        <h1 class="page-header"><?= APP_NAME ?></h1>
+      </div>
+    </div>
 
+    <div class="row">
+      <div class="col-lg-12">
         <!-- Top Content -->
 
         <div class="shell">
@@ -259,7 +270,10 @@ include_once ROOT_PATH . 'modules/bpm/includes/content_style.php';
         </div>
 
         <!-- Fim Content -->
-
+      </div>
+    </div>
+  </div>
+</div>
 
 <?php
 // carrega seus scripts globais + Camunda JS (inserido no code_footer.php)
