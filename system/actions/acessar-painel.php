@@ -25,6 +25,14 @@ if (!empty($_SESSION['user_id'])) {
 $erro     = '';
 $username = '';
 
+// Helper para escapar saída HTML (evita XSS)
+if (!function_exists('h')) {
+    function h($s): string {
+        return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+
 // CSRF simples (só para evitar post indevido)
 if (empty($_SESSION['_csrf_login'])) {
     $_SESSION['_csrf_login'] = bin2hex(random_bytes(16));

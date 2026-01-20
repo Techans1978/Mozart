@@ -31,6 +31,13 @@ return [
 
         // Conectores / API (mantido para futuro uso)
         'bpm:connectors:manage'       => 'Gerenciar conectores/API',
+
+        // BPMs AI
+        'bpm:bpmsai:read'    => 'Ver BPMs AI',
+        'bpm:bpmsai:manage'  => 'Criar/editar BPMs AI',
+        'bpm:bpmsai:publish' => 'Publicar versões BPMs AI',
+        'bpm:bpmsai:test'    => 'Testar BPMs AI (IA/Humano)',
+
     ],
 
     // === MENU lateral (backend) ===
@@ -40,6 +47,16 @@ return [
                 'label' => 'BPM / Processos',
                 'icon'  => 'fa fa-tasks',
                 'children' => [
+                    [
+                    'label'    => 'BPMs AI',
+                    'url'      => BASE_URL . '/modules/bpm/bpmsai-listar.php',
+                    'requires' => ['bpm:bpmsai:read'],
+                    ],
+                    [
+                    'label'    => 'Wizard BPMs AI',
+                    'url'      => BASE_URL . '/modules/bpm/bpmsai-wizard.php',
+                    'requires' => ['bpm:bpmsai:manage'],
+                    ],
                     [
                         'label'    => 'Wizard BPM',
                         'url'      => BASE_URL . '/modules/bpm/wizard_bpm.php',
@@ -105,6 +122,16 @@ return [
         // API (Fase 6 Runtime MVP)
         [ 'path' => '/modules/bpm/api/instance_start.php',     'requires' => ['bpm:instancias:operate'] ],
         [ 'path' => '/modules/bpm/api/task_complete.php',      'requires' => ['bpm:instancias:operate'] ],
+
+        // BPMs AI
+        [ 'path' => '/modules/bpm/bpmsai-listar.php',  'requires' => ['bpm:bpmsai:read'] ],
+        [ 'path' => '/modules/bpm/bpmsai-wizard.php',  'requires' => ['bpm:bpmsai:manage'] ],
+        [ 'path' => '/modules/bpm/bpmsai-versoes.php', 'requires' => ['bpm:bpmsai:read'] ],
+
+        [ 'path' => '/modules/bpm/api/bpmsai_flow_save.php',    'requires' => ['bpm:bpmsai:manage'] ],
+        [ 'path' => '/modules/bpm/api/bpmsai_flow_publish.php', 'requires' => ['bpm:bpmsai:publish'] ],
+        [ 'path' => '/modules/bpm/api/bpmsai_test_ai.php',      'requires' => ['bpm:bpmsai:test'] ],
+        [ 'path' => '/modules/bpm/api/bpmsai_test_human.php',   'requires' => ['bpm:bpmsai:test'] ],
     ],
 
     // === Perfis padrão ===
@@ -123,6 +150,10 @@ return [
             'bpm:substitutos:manage',
             'bpm:addcode:manage',
             'bpm:connectors:manage',
+            'bpm:bpmsai:read',
+            'bpm:bpmsai:manage',
+            'bpm:bpmsai:publish',
+            'bpm:bpmsai:test',
         ],
 
         'operador_bpm'    => [
