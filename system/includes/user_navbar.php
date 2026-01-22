@@ -158,7 +158,7 @@ require_once __DIR__ . '/../../config.php'; // ajuste se necessário
         <span class="label">Chamados</span>
       </a>
 
-      <a class="nav-item" href="#">
+      <a class="nav-item" href="<?= BASE_URL ?>/pages/processos.php">
         <span class="round c-blue">
           <svg class="ico"><use href="#i-rotate"/></svg>
         </span>

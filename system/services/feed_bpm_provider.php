@@ -11,66 +11,67 @@ if (!function_exists('feed_fetch_bpm_items')) {
       $rs = $conn->query("SHOW TABLES LIKE '$t'");
       return $rs && $rs->num_rows > 0;
     };
-    if (!$exists('bpm_event_log')) return $items;
+    // Preferência do Feed do usuário: mostrar tarefas abertas (o que ele pode agir agora)
+    if (!$exists('bpm_task') || !$exists('bpm_instance')) return $items;
 
     $uid_sql = (int)$uid;
+    $hasNew  = $exists('bpm_process_version') && $exists('bpm_process');
+    $hasElm  = $hasNew && $exists('bpm_process_version_element');
+
     $q = "
-      SELECT e.id, e.instance_id, e.event_type, e.event_time, e.actor_user_id, e.data_json,
-             i.version_id, i.status AS inst_status,
-             pv.semver AS version, p.name AS process_name
-      FROM bpm_event_log e
-      LEFT JOIN bpm_instance i         ON i.id = e.instance_id
-      LEFT JOIN bpm_process_version pv ON pv.id = i.version_id
-      LEFT JOIN bpm_process p          ON p.id = pv.process_id
-      WHERE (e.actor_user_id = $uid_sql OR e.instance_id IS NOT NULL)
-      ORDER BY e.event_time DESC
+      SELECT
+        t.id AS task_id,
+        t.instance_id,
+        t.node_id,
+        t.status AS task_status,
+        t.assignee_user_id,
+        t.candidate_group,
+        i.started_at,
+        i.status AS instance_status,
+        ".($hasNew ? "p.name AS process_name, p.category AS process_category, pv.semver AS semver" : "NULL AS process_name, NULL AS process_category, NULL AS semver")."
+        ".($hasElm ? ", e.name AS step_name" : ", NULL AS step_name")."
+      FROM bpm_task t
+      JOIN bpm_instance i ON i.id=t.instance_id
+      ".($hasNew ? "JOIN bpm_process_version pv ON pv.id=i.version_id\nJOIN bpm_process p ON p.id=pv.process_id\n" : "")."
+      ".($hasElm ? "LEFT JOIN bpm_process_version_element e ON e.process_version_id=pv.id AND e.element_id=t.node_id\n" : "")."
+      WHERE t.status IN ('ready','claimed','in_progress','error')
+        AND (t.assignee_user_id IS NULL OR t.assignee_user_id = $uid_sql)
+      ORDER BY i.started_at DESC, t.created_at DESC
       LIMIT $limit OFFSET $offset
     ";
+
     if ($rs = $conn->query($q)) {
       while ($r = $rs->fetch_assoc()) {
-        $evt  = (string)($r['event_type'] ?? '');
-        $proc = (string)($r['process_name'] ?? 'Processo');
+        $proc = (string)($r['process_name'] ?? 'BPM');
         $inst = (int)($r['instance_id'] ?? 0);
-        $semv = (string)($r['version'] ?? '');
-        $time = (string)($r['event_time'] ?? '');
+        $tid  = (int)($r['task_id'] ?? 0);
+        $time = (string)($r['started_at'] ?? '');
+        $step = (string)($r['step_name'] ?? $r['node_id'] ?? '');
 
-        $titulo = 'BPM · ' . $proc;
-        $resumo = '';
-        switch ($evt) {
-          case 'INSTANCE_STARTED':
-            $titulo .= ' — Instância iniciada';
-            $resumo  = 'Instância #'.$inst.' iniciada.';
-            break;
-          case 'INSTANCE_FINISHED':
-            $titulo .= ' — Instância concluída';
-            $resumo  = 'Instância #'.$inst.' concluída.';
-            break;
-          case 'TASK_CREATED':
-            $titulo .= ' — Nova tarefa criada';
-            $resumo  = 'Tarefa criada na instância #'.$inst.'.';
-            break;
-          case 'TASK_ASSIGNED':
-            $titulo .= ' — Tarefa atribuída';
-            $resumo  = 'Tarefa atribuída na instância #'.$inst.'.';
-            break;
-          case 'TASK_COMPLETED':
-            $titulo .= ' — Tarefa concluída';
-            $resumo  = 'Tarefa concluída na instância #'.$inst.'.';
-            break;
-          default:
-            $titulo .= ' — '.$evt;
-            $resumo  = 'Instância #'.$inst.' · Evento: '.$evt;
-        }
+        $parts = [];
+        if (!empty($r['assignee_user_id'])) $parts[] = 'Usuário #'.((int)$r['assignee_user_id']);
+        if (!empty($r['candidate_group']))  $parts[] = 'Grupo: '.((string)$r['candidate_group']);
+        $participantes = $parts ? implode(' · ', $parts) : 'Disponível (sem responsável)';
+
+        $titulo = 'BPM · '.$proc;
+        $resumo = 'Etapa: '.$step.' · Participantes: '.$participantes;
 
         $items[] = [
-          'id'       => $inst,
+          'id'       => $tid,
           'tipo'     => 'bpm',
           'titulo'   => $titulo,
           'resumo'   => $resumo,
           'dt_ref'   => $time,
           'featured' => 0,
-          'link'     => BASE_URL.'/modules/bpm/instancia-detalhes.php?id='.$inst,
-          'extra'    => ['processo'=>$proc, 'version'=>$semv, 'evento'=>$evt]
+          'link'     => BASE_URL.'/pages/bpm_task.php?id='.$tid,
+          'extra'    => [
+            'instance_id' => $inst,
+            'started_at'  => $time,
+            'process_name'=> $proc,
+            'step_name'   => $step,
+            'participants'=> $participantes,
+            'task_id'     => $tid,
+          ]
         ];
       }
     }

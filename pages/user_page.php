@@ -68,7 +68,8 @@ include_once ROOT_PATH . '/pages/_snippet_enable_bpm_in_feed.php'; // <- adicion
                 'dica'      => '💡',
                 'midia'     => '🖼️',
                 'documento' => '📄',
-                'evento'    => '📅'
+                'evento'    => '📅',
+                'bpm'       => '🔄'
               ][$it['tipo']] ?? '📌';
             ?>
             <span><?= $emoji ?> <?= h(ucfirst($it['tipo'])) ?> · <?= h($it['titulo']) ?></span>
@@ -120,6 +121,17 @@ include_once ROOT_PATH . '/pages/_snippet_enable_bpm_in_feed.php'; // <- adicion
             </div>
           <?php endif; ?>
 
+          <?php if($it['tipo']==='bpm'): ?>
+            <?php $e = (array)($it['extra'] ?? []); ?>
+            <div class="meta">
+              <?php if(!empty($e['instance_id'])): ?><span class="chip">Número do BPM: <b>#<?= (int)$e['instance_id'] ?></b></span><?php endif; ?>
+              <?php if(!empty($e['started_at'])): ?><span class="chip">Data de abertura: <?= h($e['started_at']) ?></span><?php endif; ?>
+              <?php if(!empty($e['process_name'])): ?><span class="chip">Nome do BPM: <b><?= h($e['process_name']) ?></b></span><?php endif; ?>
+              <?php if(!empty($e['step_name'])): ?><span class="chip">Etapa: <b><?= h($e['step_name']) ?></b></span><?php endif; ?>
+              <?php if(!empty($e['participants'])): ?><span class="chip">Participantes: <?= h($e['participants']) ?></span><?php endif; ?>
+            </div>
+          <?php endif; ?>
+
           <div class="actions">
             <?php
               // Links internos (ajuste se tiver páginas de "ver" separadas das de "editar")
@@ -130,7 +142,9 @@ include_once ROOT_PATH . '/pages/_snippet_enable_bpm_in_feed.php'; // <- adicion
                 'documento' => BASE_URL.'/pages/documentos_editar.php?id=',
                 'evento'    => BASE_URL.'/pages/event_editar.php?id=',
               ];
-              $href = ($map[$it['tipo']] ?? '#') . (int)$it['id'];
+              $href = $it['tipo']==='bpm'
+                ? (!empty($it['link']) ? $it['link'] : '#')
+                : (($map[$it['tipo']] ?? '#') . (int)$it['id']);
             ?>
             <a class="btn ghost" href="<?= $href ?>">Abrir</a>
           </div>

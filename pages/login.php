@@ -20,7 +20,7 @@ include_once ROOT_PATH . '/system/includes/head.php';
                             <h3 class="panel-title">Acesso ao Painel</h3>
                         </div>
                         <div class="panel-body">
-							<p><img class="logo-image d-none d-lg-inline-block" src="<?= BASE_URL ?>/data/media/media_sytem/images/grupo-abc-logo.png" alt="Grupo ABC" width="150px" height="auto"></p>
+							<p  style="text-align:center;"><img class="logo-image d-none d-lg-inline-block" src="<?= BASE_URL ?>/data/media/media_sytem/images/grupo-abc-logo.png" alt="Grupo ABC" width="150px" height="auto"></p>
 							<fieldset>
 							    <form action="<?= BASE_URL ?>/system/actions/acessar-painel.php" method="post">
 									<div class="form-group">
@@ -30,15 +30,15 @@ include_once ROOT_PATH . '/system/includes/head.php';
 
 									<div class="form-group">
                                         <label for="senha">Senha:</label>
-                                        <div class="input-group">
+                                        <div class="input-group" style="width: 100%;">
                                             <input class="form-control" type="password" id="senha" name="senha" required>
                                             <span class="input-group-text" style="cursor:pointer;" onclick="toggleSenha()">👁️ Exibir senha</span>
                                         </div>
                                     </div>
 
-									<button type="submit">Entrar</button>
-                                    <p style="margin-top:25px;"><a href="<?= BASE_URL ?>/modules/gestao_terceiros/index.php">Cadastrar Terceiro</a><p>
-                                    <p style="margin-top:25px;"><a href="<?= BASE_URL ?>/recuperar_senha.php">Recuperar Senha</a><p>
+									<button type="submit" style="color: #fff; background-color: #5cb85c; border-color: #4cae4c; display: block; width: 100%; padding: 10px 16px; font-size: 18px; line-height: 1.3333333; border-radius: 6px;">Entrar</button>
+                                    <p style="margin-top:25px;text-align:center;"><a href="<?= BASE_URL ?>/modules/gestao_terceiros/index.php">Cadastrar Terceiro</a><p>
+                                    <p style="margin-top:25px;text-align:center;"><a href="<?= BASE_URL ?>/recuperar_senha.php">Esqueci minha senha</a><p>
 								</form>
 							</fieldset>
                         </div>
