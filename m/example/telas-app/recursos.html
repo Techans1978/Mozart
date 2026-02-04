@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mozart App - Recursos</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --text:#e7eef8; --muted:#a7b3c6; --line:rgba(255,255,255,.08);
+      --max:520px; --radius:18px; --shadow:0 10px 24px rgba(0,0,0,.25);
+      --accent:#66e3ff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
+    a{color:inherit;text-decoration:none}
+    .app{max-width:var(--max);margin:0 auto;min-height:100vh;padding:14px 14px 92px}
+    .top{display:flex;justify-content:space-between;align-items:center;padding:8px 2px 14px}
+    h1{margin:0;font-size:16px}
+    .muted{color:var(--muted);font-size:12px}
+    input{
+      width:100%; padding:12px; border-radius:14px;
+      border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--text);
+      outline:none; margin-bottom:12px;
+    }
+    .grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
+    .tile{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      border-radius:var(--radius);
+      padding:14px;
+      box-shadow:var(--shadow);
+      display:flex;flex-direction:column;gap:10px;
+      min-height:118px;
+    }
+    .icon{
+      width:40px;height:40px;border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      display:grid;place-items:center;font-weight:900;
+      color: var(--accent);
+    }
+    .tile b{font-size:13px}
+    .tile small{color:var(--muted);font-size:11px;line-height:1.2}
+    .pill{
+      margin-top:auto; align-self:flex-start;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--line);
+      font-size:11px;color:var(--muted)
+    }
+    .nav{position:fixed;left:0;right:0;bottom:0;background:rgba(10,14,20,.85);border-top:1px solid var(--line);backdrop-filter:blur(10px)}
+    .nav .inner{max-width:var(--max);margin:0 auto;display:flex;justify-content:space-around;padding:10px 10px 14px}
+    .tab{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--muted);padding:8px 10px;border-radius:14px;text-decoration:none}
+    .tab.active{color:var(--text);background:rgba(102,227,255,.10);border:1px solid rgba(102,227,255,.18)}
+    .ticon{width:22px;height:22px;display:grid;place-items:center;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="top">
+      <div>
+        <h1>Recursos</h1>
+        <div class="muted">Utilidades corporativas</div>
+      </div>
+      <div class="muted">RBAC ✓</div>
+    </div>
+
+    <input placeholder="Buscar recurso (ex: notas, agenda, ajuda...)" />
+
+    <div class="grid">
+      <a class="tile" href="ajuda.html">
+        <div class="icon">🆘</div>
+        <div>
+          <b>Ajuda & Base</b>
+          <small>FAQ, tutoriais, manuais e abertura rápida de chamado</small>
+        </div>
+        <span class="pill">Central</span>
+      </a>
+
+      <a class="tile" href="notas.html">
+        <div class="icon">📓</div>
+        <div>
+          <b>Caderno de notas</b>
+          <small>Anotações rápidas, checklist e anexos</small>
+        </div>
+        <span class="pill">Pessoal</span>
+      </a>
+
+      <a class="tile" href="agenda.html">
+        <div class="icon">📅</div>
+        <div>
+          <b>Agenda corporativa</b>
+          <small>Reuniões, eventos, plantões e lembretes</small>
+        </div>
+        <span class="pill">Equipe</span>
+      </a>
+
+      <a class="tile" href="chat.html">
+        <div class="icon">💬</div>
+        <div>
+          <b>Chat corporativo</b>
+          <small>Canais por setor e conversas por unidade</small>
+        </div>
+        <span class="pill">Integração</span>
+      </a>
+
+      <a class="tile" href="notificacoes.html">
+        <div class="icon">🔔</div>
+        <div>
+          <b>Notificações</b>
+          <small>E-mail, push e preferências por módulo</small>
+        </div>
+        <span class="pill">Config</span>
+      </a>
+
+      <a class="tile" href="#">
+        <div class="icon">📎</div>
+        <div>
+          <b>Arquivos</b>
+          <small>Modelos, documentos, políticas e anexos</small>
+        </div>
+        <span class="pill">Drive</span>
+      </a>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="inner">
+      <a class="tab" href="home.html"><div class="ticon">🏠</div>Home</a>
+      <a class="tab" href="indicadores.html"><div class="ticon">📊</div>Indicadores</a>
+      <a class="tab" href="modulos.html"><div class="ticon">🧩</div>Módulos</a>
+      <a class="tab active" href="recursos.html"><div class="ticon">✨</div>Mais</a>
+    </div>
+  </nav>
+</body>
+</html>

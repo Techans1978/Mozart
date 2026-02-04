@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mozart App - Foto para Pré-preencher</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --text:#e7eef8; --muted:#a7b3c6; --line:rgba(255,255,255,.08);
+      --max:520px; --radius:18px; --shadow:0 10px 24px rgba(0,0,0,.25);
+      --accent:#66e3ff; --ok:#43f58a; --warn:#ffd166; --bad:#ff5d73;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
+    a{color:inherit;text-decoration:none}
+    .app{max-width:var(--max);margin:0 auto;min-height:100vh;padding:14px 14px 22px}
+    .top{display:flex;justify-content:space-between;align-items:center;padding:8px 2px 14px}
+    h1{margin:0;font-size:16px}
+    .muted{color:var(--muted);font-size:12px}
+    .card{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);margin-bottom:12px}
+    .row{display:flex;gap:10px;align-items:center}
+    input, select{
+      width:100%; padding:12px; border-radius:14px;
+      border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--text);
+      outline:none;
+    }
+    .preview{
+      height:170px;border-radius:16px;border:1px dashed rgba(255,255,255,.14);
+      background:rgba(0,0,0,.18);
+      display:grid;place-items:center;color:var(--muted);
+      text-align:center;padding:14px;
+    }
+    .btn{
+      width:100%; padding:12px 14px;border-radius:16px;
+      border:1px solid rgba(102,227,255,.22);
+      background:rgba(102,227,255,.10);
+      color:var(--text);font-weight:900;cursor:pointer;
+    }
+    .btn.secondary{border:1px solid var(--line);background:rgba(255,255,255,.04);font-weight:800}
+    .hint{margin-top:8px;color:var(--muted);font-size:12px;line-height:1.35}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:12px;color:var(--muted)}
+    .dot{width:9px;height:9px;border-radius:999px;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.bad{background:var(--bad)}
+
+    .field{
+      display:flex;justify-content:space-between;gap:12px;align-items:flex-start;
+      padding:12px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.03);
+      margin-top:10px;
+    }
+    .conf{font-size:11px;color:var(--muted);white-space:nowrap;border:1px solid var(--line);padding:6px 10px;border-radius:999px}
+    .tag{font-weight:900}
+    .value{margin-top:4px;color:var(--text)}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="top">
+      <div>
+        <h1>Foto → Pré-preencher</h1>
+        <div class="muted">A IA sugere, você confirma</div>
+      </div>
+      <a class="muted" href="ativos-cadastro.html">Voltar</a>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900;margin-bottom:10px">1) Capture</div>
+      <div class="preview">
+        (mock) Prévia da foto do ativo<br/>
+        <span class="hint">Dica: fotografe a etiqueta/placa + visão geral do equipamento.</span>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button class="btn secondary" type="button">📷 Tirar foto</button>
+        <button class="btn secondary" type="button">🖼️ Galeria</button>
+      </div>
+
+      <div class="chips">
+        <span class="chip"><span class="dot ok"></span>Serial geralmente vem da etiqueta</span>
+        <span class="chip"><span class="dot warn"></span>Modelo pode vir do texto ou aparência</span>
+        <span class="chip"><span class="dot bad"></span>Se falhar, siga manual</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900;margin-bottom:10px">2) Sugestões encontradas (mock)</div>
+
+      <div class="field">
+        <div>
+          <div class="tag">Serial</div>
+          <div class="value">5CD123XYZ</div>
+          <div class="hint">Fonte: etiqueta</div>
+        </div>
+        <div class="conf">Confiança: alta</div>
+      </div>
+
+      <div class="field">
+        <div>
+          <div class="tag">Marca</div>
+          <div class="value">Dell</div>
+          <div class="hint">Fonte: etiqueta / logotipo</div>
+        </div>
+        <div class="conf">Confiança: média</div>
+      </div>
+
+      <div class="field">
+        <div>
+          <div class="tag">Modelo</div>
+          <div class="value">OptiPlex 7090</div>
+          <div class="hint">Fonte: texto parcial</div>
+        </div>
+        <div class="conf">Confiança: média</div>
+      </div>
+
+      <div class="field">
+        <div>
+          <div class="tag">Categoria</div>
+          <div class="value">Computador</div>
+          <div class="hint">Fonte: heurística</div>
+        </div>
+        <div class="conf">Confiança: baixa</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900;margin-bottom:10px">3) Revisar e salvar</div>
+
+      <div class="row">
+        <input placeholder="Tag patrimonial (ex: ABC-000123)" />
+        <input value="5CD123XYZ" />
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <select>
+          <option>Categoria: Computador</option>
+          <option>Categoria: Monitor</option>
+          <option>Categoria: Impressora</option>
+          <option>Categoria: Rede</option>
+        </select>
+        <select>
+          <option>Unidade: Loja 12</option>
+          <option>Unidade: Loja 05</option>
+          <option>Unidade: Matriz</option>
+        </select>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <input value="Dell" />
+        <input value="OptiPlex 7090" />
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <button class="btn secondary" type="button">Editar sugestões</button>
+        <button class="btn" type="button">Salvar ativo</button>
+      </div>
+
+      <div class="hint" style="margin-top:10px">
+        Regra sugerida: salvar só quando “Tag” e “Unidade” estiverem preenchidos.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

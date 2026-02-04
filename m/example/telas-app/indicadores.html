@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mozart App - Indicadores</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --card:#121a24; --text:#e7eef8; --muted:#a7b3c6;
+      --line:rgba(255,255,255,.08); --radius:18px; --max:520px;
+      --shadow: 0 10px 24px rgba(0,0,0,.25);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
+    .app{max-width:var(--max);margin:0 auto;min-height:100vh;padding:14px 14px 92px}
+    .top{display:flex;justify-content:space-between;align-items:center;padding:8px 2px 14px}
+    h1{margin:0;font-size:16px}
+    .muted{color:var(--muted);font-size:12px}
+    .filters{display:flex;gap:10px;margin:10px 0 12px}
+    select,input{
+      width:100%; padding:10px 12px; border-radius:14px;
+      border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--text);
+      outline:none;
+    }
+    .grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
+    .card{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      border-radius:var(--radius);
+      padding:14px;
+      box-shadow:var(--shadow);
+    }
+    .kpi{font-size:22px;font-weight:800;margin:8px 0 2px}
+    .label{font-size:12px;color:var(--muted)}
+    .list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+    .row{
+      display:flex;gap:12px;align-items:center;
+      padding:12px; border-radius:16px; border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+    }
+    .badge{padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:11px;color:var(--muted)}
+    .nav{position:fixed;left:0;right:0;bottom:0;background:rgba(10,14,20,.85);border-top:1px solid var(--line);backdrop-filter:blur(10px)}
+    .nav .inner{max-width:var(--max);margin:0 auto;display:flex;justify-content:space-around;padding:10px 10px 14px}
+    .tab{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--muted);padding:8px 10px;border-radius:14px;text-decoration:none}
+    .tab.active{color:var(--text);background:rgba(255,255,255,.06);border:1px solid var(--line)}
+    .ticon{width:22px;height:22px;display:grid;place-items:center;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="top">
+      <div>
+        <h1>Indicadores</h1>
+        <div class="muted">Visão rápida por período e unidade</div>
+      </div>
+      <div class="badge">Atualizado 09:42</div>
+    </div>
+
+    <div class="filters">
+      <select>
+        <option>Hoje</option>
+        <option>Últimos 7 dias</option>
+        <option>Últimos 30 dias</option>
+      </select>
+      <select>
+        <option>Loja 12</option>
+        <option>Loja 05</option>
+        <option>Todas</option>
+      </select>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="label">SLA Chamados</div>
+        <div class="kpi">92%</div>
+        <div class="label">Dentro do prazo</div>
+      </div>
+      <div class="card">
+        <div class="label">BPM em atraso</div>
+        <div class="kpi">4</div>
+        <div class="label">Processos estourados</div>
+      </div>
+      <div class="card">
+        <div class="label">Ativos pendentes</div>
+        <div class="kpi">11</div>
+        <div class="label">Sem inventário</div>
+      </div>
+      <div class="card">
+        <div class="label">Integrações</div>
+        <div class="kpi">1</div>
+        <div class="label">Falha ativa</div>
+      </div>
+    </div>
+
+    <div class="list">
+      <div class="row">
+        <div style="font-weight:800">Top gargalo</div>
+        <div style="margin-left:auto" class="badge">BPM • Step 3</div>
+      </div>
+      <div class="row">
+        <div>
+          <div style="font-weight:800">Categoria crítica</div>
+          <div class="muted">TI Infra • Rede / Link</div>
+        </div>
+        <div style="margin-left:auto" class="badge">GLPI</div>
+      </div>
+      <div class="row">
+        <div>
+          <div style="font-weight:800">Unidade fora do padrão</div>
+          <div class="muted">Loja 05 • alerta de divergência</div>
+        </div>
+        <div style="margin-left:auto" class="badge">Ops</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="inner">
+      <a class="tab" href="home.html"><div class="ticon">🏠</div>Home</a>
+      <a class="tab active" href="indicadores.html"><div class="ticon">📊</div>Indicadores</a>
+      <a class="tab" href="modulos.html"><div class="ticon">🧩</div>Módulos</a>
+      <a class="tab" href="perfil.html"><div class="ticon">👤</div>Perfil</a>
+    </div>
+  </nav>
+</body>
+</html>

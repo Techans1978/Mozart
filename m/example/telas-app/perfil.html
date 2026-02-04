@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mozart App - Perfil</title>
+  <style>
+    :root{--bg:#0b0f14;--text:#e7eef8;--muted:#a7b3c6;--line:rgba(255,255,255,.08);--max:520px;--radius:18px}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
+    .app{max-width:var(--max);margin:0 auto;min-height:100vh;padding:14px 14px 92px}
+    .card{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+    .top{display:flex;justify-content:space-between;align-items:center;padding:8px 2px 14px}
+    h1{margin:0;font-size:16px}
+    .row{display:flex;gap:12px;align-items:center}
+    .avatar{width:46px;height:46px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid var(--line);display:grid;place-items:center;font-weight:900}
+    .muted{color:var(--muted);font-size:12px}
+    .item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+    .item:first-of-type{border-top:0}
+    .btn{width:100%;padding:12px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);font-weight:700}
+    .nav{position:fixed;left:0;right:0;bottom:0;background:rgba(10,14,20,.85);border-top:1px solid var(--line);backdrop-filter:blur(10px)}
+    .nav .inner{max-width:var(--max);margin:0 auto;display:flex;justify-content:space-around;padding:10px 10px 14px}
+    .tab{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--muted);padding:8px 10px;border-radius:14px;text-decoration:none}
+    .tab.active{color:var(--text);background:rgba(255,255,255,.06);border:1px solid var(--line)}
+    .ticon{width:22px;height:22px;display:grid;place-items:center;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="top">
+      <div>
+        <h1>Perfil</h1>
+        <div class="muted">Conta e preferências</div>
+      </div>
+      <div class="muted">v0.1</div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div class="avatar">MT</div>
+        <div>
+          <div style="font-weight:900">Marcelo Teixeira</div>
+          <div class="muted">Gestor • RBAC: admin.loja</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900;margin-bottom:8px">Contexto</div>
+      <div class="item">
+        <div>Unidade atual</div>
+        <div class="muted">Loja 12</div>
+      </div>
+      <div class="item">
+        <div>Modo</div>
+        <div class="muted">Operação</div>
+      </div>
+      <div class="item">
+        <div>Notificações</div>
+        <div class="muted">Ativas</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900;margin-bottom:8px">Preferências</div>
+      <div class="item">
+        <div>Tema</div>
+        <div class="muted">Escuro</div>
+      </div>
+      <div class="item">
+        <div>Resumo diário</div>
+        <div class="muted">08:00</div>
+      </div>
+      <div class="item">
+        <div>Copiloto IA</div>
+        <div class="muted">Ativo</div>
+      </div>
+    </div>
+
+    <button class="btn" type="button">Sair</button>
+  </div>
+
+  <nav class="nav">
+    <div class="inner">
+      <a class="tab" href="home.html"><div class="ticon">🏠</div>Home</a>
+      <a class="tab" href="indicadores.html"><div class="ticon">📊</div>Indicadores</a>
+      <a class="tab" href="modulos.html"><div class="ticon">🧩</div>Módulos</a>
+      <a class="tab active" href="perfil.html"><div class="ticon">👤</div>Perfil</a>
+    </div>
+  </nav>
+</body>
+</html>

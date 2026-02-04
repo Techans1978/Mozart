@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mozart App - Módulos</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --text:#e7eef8; --muted:#a7b3c6; --line:rgba(255,255,255,.08);
+      --max:520px; --radius:18px; --shadow: 0 10px 24px rgba(0,0,0,.25);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
+    .app{max-width:var(--max);margin:0 auto;min-height:100vh;padding:14px 14px 92px}
+    .top{display:flex;justify-content:space-between;align-items:center;padding:8px 2px 14px}
+    h1{margin:0;font-size:16px}
+    .muted{color:var(--muted);font-size:12px}
+    input{
+      width:100%; padding:12px 12px; border-radius:14px;
+      border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--text);
+      outline:none; margin-bottom:12px;
+    }
+    .grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
+    .mod{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      border-radius:var(--radius);
+      padding:14px;
+      box-shadow:var(--shadow);
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .icon{
+      width:40px;height:40px;border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      display:grid;place-items:center;font-weight:900;
+    }
+    .mod b{font-size:13px}
+    .mod small{color:var(--muted);font-size:11px;line-height:1.2}
+    .tag{margin-top:auto;align-self:flex-start;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:11px;color:var(--muted)}
+    .nav{position:fixed;left:0;right:0;bottom:0;background:rgba(10,14,20,.85);border-top:1px solid var(--line);backdrop-filter:blur(10px)}
+    .nav .inner{max-width:var(--max);margin:0 auto;display:flex;justify-content:space-around;padding:10px 10px 14px}
+    .tab{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--muted);padding:8px 10px;border-radius:14px;text-decoration:none}
+    .tab.active{color:var(--text);background:rgba(255,255,255,.06);border:1px solid var(--line)}
+    .ticon{width:22px;height:22px;display:grid;place-items:center;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="top">
+      <div>
+        <h1>Módulos</h1>
+        <div class="muted">Acesso rápido por área</div>
+      </div>
+      <div class="muted">RBAC ✓</div>
+    </div>
+
+    <input placeholder="Buscar módulo (ex: chamados, bpm, ativos...)" />
+
+    <div class="grid">
+      <a class="mod" href="#">
+        <div class="icon">🛠</div>
+        <div>
+          <b>Help Desk</b>
+          <small>Chamados, SLA, acompanhamento</small>
+        </div>
+        <span class="tag">GLPI</span>
+      </a>
+
+      <a class="mod" href="#">
+        <div class="icon">🧭</div>
+        <div>
+          <b>BPM</b>
+          <small>Processos, tarefas, aprovações</small>
+        </div>
+        <span class="tag">Orquestração</span>
+      </a>
+
+      <a class="mod" href="#">
+        <div class="icon">📦</div>
+        <div>
+          <b>Ativos</b>
+          <small>Inventário, modelos, fornecedores</small>
+        </div>
+        <span class="tag">Patrimônio</span>
+      </a>
+
+      <a class="mod" href="#">
+        <div class="icon">🤖</div>
+        <div>
+          <b>IA</b>
+          <small>Insights, resumos, recomendações</small>
+        </div>
+        <span class="tag">Copiloto</span>
+      </a>
+
+      <a class="mod" href="#">
+        <div class="icon">📣</div>
+        <div>
+          <b>Marketing/WPP</b>
+          <small>Campanhas, listas, resultados</small>
+        </div>
+        <span class="tag">WPP</span>
+      </a>
+
+      <a class="mod" href="#">
+        <div class="icon">🧩</div>
+        <div>
+          <b>Conectores</b>
+          <small>Integrações, filas, status</small>
+        </div>
+        <span class="tag">Integra</span>
+      </a>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="inner">
+      <a class="tab" href="home.html"><div class="ticon">🏠</div>Home</a>
+      <a class="tab" href="indicadores.html"><div class="ticon">📊</div>Indicadores</a>
+      <a class="tab active" href="modulos.html"><div class="ticon">🧩</div>Módulos</a>
+      <a class="tab" href="perfil.html"><div class="ticon">👤</div>Perfil</a>
+    </div>
+  </nav>
+</body>
+</html>

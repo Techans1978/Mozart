@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mozart App - Cadastro de Ativo</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --text:#e7eef8; --muted:#a7b3c6; --line:rgba(255,255,255,.08);
+      --max:520px; --radius:18px; --shadow:0 10px 24px rgba(0,0,0,.25);
+      --accent:#66e3ff; --ok:#43f58a; --warn:#ffd166;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
+    a{color:inherit;text-decoration:none}
+    .app{max-width:var(--max);margin:0 auto;min-height:100vh;padding:14px 14px 22px}
+    .top{display:flex;justify-content:space-between;align-items:center;padding:8px 2px 14px}
+    h1{margin:0;font-size:16px}
+    .muted{color:var(--muted);font-size:12px}
+    .card{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);margin-bottom:12px}
+    .row{display:flex;gap:10px;align-items:center}
+    input, select, textarea{
+      width:100%; padding:12px; border-radius:14px;
+      border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:70px;resize:vertical}
+    .btn{
+      width:100%; padding:12px 14px;border-radius:16px;
+      border:1px solid rgba(102,227,255,.22);
+      background:rgba(102,227,255,.10);
+      color:var(--text);font-weight:900;cursor:pointer;
+    }
+    .btn.secondary{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      font-weight:800;
+    }
+    .hint{margin-top:8px;color:var(--muted);font-size:12px;line-height:1.35}
+    .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:12px;color:var(--muted)}
+    .dot{width:9px;height:9px;border-radius:999px;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="top">
+      <div>
+        <h1>Cadastrar ativo</h1>
+        <div class="muted">Inventário rápido pela equipe</div>
+      </div>
+      <a class="muted" href="modulos.html">Voltar</a>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-weight:900">Começar pelo quê?</div>
+          <div class="hint">Você pode preencher manualmente ou usar foto para pré-preencher.</div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <a class="btn secondary" href="ativos-foto.html">📷 Foto (pré-preencher)</a>
+        <button class="btn secondary" type="button">🏷️ Ler etiqueta (QR/Código)</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900;margin-bottom:10px">Dados principais</div>
+
+      <div class="row">
+        <input placeholder="Tag patrimonial (ex: ABC-000123)" />
+        <input placeholder="Serial (ex: 5CD123...)" />
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <select>
+          <option>Categoria: Computador</option>
+          <option>Categoria: Monitor</option>
+          <option>Categoria: Impressora</option>
+          <option>Categoria: Rede</option>
+          <option>Categoria: Outros</option>
+        </select>
+        <select>
+          <option>Unidade: Loja 12</option>
+          <option>Unidade: Loja 05</option>
+          <option>Unidade: Matriz</option>
+        </select>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <input placeholder="Marca (ex: Dell)" />
+        <input placeholder="Modelo (ex: OptiPlex 7090)" />
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <select>
+          <option>Status: Em uso</option>
+          <option>Status: Em estoque</option>
+          <option>Status: Em manutenção</option>
+          <option>Status: Baixado</option>
+        </select>
+        <select>
+          <option>Local: TI / Sala 2</option>
+          <option>Local: Caixa 01</option>
+          <option>Local: Administrativo</option>
+        </select>
+      </div>
+
+      <div style="margin-top:10px">
+        <textarea placeholder="Observações (ex: sem fonte / precisa formatação / tela com risco...)"></textarea>
+      </div>
+
+      <div class="hint">
+        <span class="chip"><span class="dot ok"></span>Campos essenciais: Tag, Categoria, Unidade</span>
+        <span class="chip"><span class="dot warn"></span>Serial e Modelo ajudam a evitar duplicidade</span>
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <button class="btn secondary" type="button">Anexar fotos</button>
+        <button class="btn" type="button">Salvar ativo</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mozart App - Notas</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --text:#e7eef8; --muted:#a7b3c6; --line:rgba(255,255,255,.08);
+      --max:520px; --radius:18px; --shadow:0 10px 24px rgba(0,0,0,.25);
+      --accent:#66e3ff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
+    .app{max-width:var(--max);margin:0 auto;min-height:100vh;padding:14px 14px 22px}
+    .top{display:flex;justify-content:space-between;align-items:center;padding:8px 2px 14px}
+    h1{margin:0;font-size:16px}
+    .muted{color:var(--muted);font-size:12px}
+    .card{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);margin-bottom:12px}
+    .row{display:flex;gap:10px;align-items:center}
+    input, textarea{
+      width:100%; padding:12px; border-radius:14px;
+      border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:120px; resize:vertical}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .chip{padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:12px;color:var(--muted)}
+    .btn{
+      padding:12px 14px;border-radius:16px;border:1px solid rgba(102,227,255,.22);
+      background:rgba(102,227,255,.10);color:var(--text);font-weight:800;cursor:pointer;
+    }
+    .list{display:flex;flex-direction:column;gap:10px}
+    .note{
+      padding:12px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.03);
+      display:flex;gap:12px;align-items:flex-start
+    }
+    .tag{font-size:11px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;white-space:nowrap}
+    .meta{margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="top">
+      <div>
+        <h1>Caderno de notas</h1>
+        <div class="muted">Rápido, organizado e útil no dia a dia</div>
+      </div>
+      <a class="muted" href="recursos.html">Voltar</a>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div style="font-weight:900">Nova nota</div>
+        <button class="btn" type="button">Salvar</button>
+      </div>
+      <div style="margin-top:10px">
+        <input placeholder="Título (ex: reunião loja 12 / pendências TI)" />
+      </div>
+      <div style="margin-top:10px">
+        <textarea placeholder="Escreva aqui... (pode colar links, números de chamados, processos, etc.)"></textarea>
+      </div>
+      <div class="chips">
+        <span class="chip">#loja12</span>
+        <span class="chip">#chamados</span>
+        <span class="chip">#bpm</span>
+        <span class="chip">+tag</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900;margin-bottom:10px">Minhas notas</div>
+      <div class="list">
+        <div class="note">
+          <div>📌</div>
+          <div>
+            <div style="font-weight:900">Pendências do dia</div>
+            <div class="muted" style="margin-top:4px">Revisar 3 chamados críticos e 1 falha de integração…</div>
+            <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+              <span class="tag">#operacao</span>
+              <span class="tag">#glpi</span>
+            </div>
+          </div>
+          <div class="meta">09:10</div>
+        </div>
+
+        <div class="note">
+          <div>✅</div>
+          <div>
+            <div style="font-weight:900">Checklist inventário</div>
+            <div class="muted" style="margin-top:4px">Loja 05: validar 11 ativos pendentes…</div>
+            <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+              <span class="tag">#ativos</span>
+              <span class="tag">#loja05</span>
+            </div>
+          </div>
+          <div class="meta">Ontem</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

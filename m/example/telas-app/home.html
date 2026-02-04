@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mozart App - Home</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --card:#121a24;
+      --card2:#0f1620;
+      --text:#e7eef8;
+      --muted:#a7b3c6;
+      --line:rgba(255,255,255,.08);
+      --accent:#66e3ff;
+      --ok:#43f58a;
+      --warn:#ffd166;
+      --bad:#ff5d73;
+      --shadow: 0 10px 24px rgba(0,0,0,.35);
+      --radius: 18px;
+      --radius2: 14px;
+      --pad: 14px;
+      --max: 520px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(900px 600px at 20% -10%, rgba(102,227,255,.18), transparent 60%),
+                  radial-gradient(700px 500px at 100% 0%, rgba(67,245,138,.10), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+    }
+    a{color:inherit; text-decoration:none}
+    .app{
+      max-width: var(--max);
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: 14px 14px 92px;
+    }
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 8px 2px 14px;
+      gap:10px;
+    }
+    .brand{
+      display:flex; gap:10px; align-items:center;
+    }
+    .logo{
+      width:38px; height:38px; border-radius: 12px;
+      background: linear-gradient(135deg, rgba(102,227,255,.9), rgba(67,245,138,.75));
+      box-shadow: var(--shadow);
+    }
+    .brand h1{font-size:16px; margin:0; line-height:1.1}
+    .brand small{display:block; color:var(--muted); font-size:12px; margin-top:2px}
+    .actions{
+      display:flex; gap:10px; align-items:center;
+    }
+    .pill{
+      display:flex; align-items:center; gap:8px;
+      padding: 10px 12px; border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      border-radius: 999px;
+      font-size:12px; color: var(--muted);
+    }
+    .bell{
+      position:relative;
+      width:40px; height:40px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      display:grid; place-items:center;
+    }
+    .badge{
+      position:absolute; top:-6px; right:-6px;
+      background: var(--bad);
+      color:#081018;
+      font-weight:700;
+      width:22px; height:22px;
+      border-radius: 999px;
+      display:grid; place-items:center;
+      font-size:12px;
+      border: 2px solid var(--bg);
+    }
+
+    .section-title{
+      display:flex; justify-content:space-between; align-items:baseline;
+      margin: 10px 2px 10px;
+    }
+    .section-title h2{margin:0; font-size:14px}
+    .section-title span{font-size:12px; color:var(--muted)}
+    .grid{
+      display:grid; gap:12px;
+    }
+    .grid.cards{grid-template-columns: repeat(2, 1fr);}
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      padding: var(--pad);
+      box-shadow: 0 10px 24px rgba(0,0,0,.22);
+    }
+    .card .row{display:flex; justify-content:space-between; align-items:center; gap:8px;}
+    .kpi{
+      font-size:22px; font-weight:800; letter-spacing:.2px;
+      margin: 6px 0 2px;
+    }
+    .label{font-size:12px; color:var(--muted)}
+    .dot{width:9px;height:9px;border-radius:999px; display:inline-block; margin-right:8px;}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.bad{background:var(--bad)}
+    .chip{
+      font-size:11px; color: var(--muted);
+      padding: 6px 10px; border-radius: 999px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.12);
+      white-space:nowrap;
+    }
+
+    .quick{
+      display:grid; grid-template-columns: repeat(2, 1fr); gap:10px;
+    }
+    .qbtn{
+      padding: 12px 12px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      display:flex; gap:10px; align-items:center;
+    }
+    .qicon{
+      width:34px; height:34px; border-radius: 12px;
+      background: rgba(102,227,255,.12);
+      border: 1px solid rgba(102,227,255,.22);
+      display:grid; place-items:center;
+      font-weight:800; color: var(--accent);
+    }
+    .qbtn b{font-size:13px}
+    .qbtn small{display:block; color:var(--muted); font-size:11px; margin-top:2px}
+
+    .feed{display:flex; flex-direction:column; gap:10px;}
+    .item{
+      display:flex; gap:12px; align-items:flex-start;
+      padding: 12px;
+      border-radius: 16px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+    }
+    .ico{
+      width:34px; height:34px; border-radius: 12px;
+      display:grid; place-items:center;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.15);
+      font-weight:800;
+    }
+    .item p{margin:0; font-size:13px; line-height:1.35}
+    .item p small{display:block; color:var(--muted); margin-top:4px; font-size:12px}
+    .item .meta{margin-left:auto; color:var(--muted); font-size:11px; white-space:nowrap}
+
+    .ai{
+      margin-top: 12px;
+      background: linear-gradient(135deg, rgba(102,227,255,.10), rgba(67,245,138,.08));
+      border:1px solid rgba(102,227,255,.18);
+    }
+    .ai .prompt{
+      display:flex; gap:10px; align-items:center;
+      margin-top:10px;
+      background: rgba(0,0,0,.16);
+      border:1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px 12px;
+    }
+    .ai input{
+      width:100%;
+      border:0; outline:0;
+      background:transparent;
+      color: var(--text);
+      font-size:13px;
+    }
+    .send{
+      width:42px; height:36px;
+      border-radius: 14px;
+      border:1px solid rgba(102,227,255,.25);
+      background: rgba(102,227,255,.12);
+      color: var(--accent);
+      font-weight:800;
+      cursor:pointer;
+    }
+    .suggest{
+      display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;
+    }
+    .sbtn{
+      padding: 8px 10px;
+      border-radius: 999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      font-size:12px; color: var(--muted);
+    }
+
+    .nav{
+      position:fixed; left:0; right:0; bottom:0;
+      background: rgba(10,14,20,.85);
+      border-top:1px solid var(--line);
+      backdrop-filter: blur(10px);
+    }
+    .nav .inner{
+      max-width: var(--max);
+      margin:0 auto;
+      display:flex; justify-content:space-around;
+      padding: 10px 10px 14px;
+      gap:6px;
+    }
+    .tab{
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+      font-size:11px; color: var(--muted);
+      padding: 8px 10px;
+      border-radius: 14px;
+    }
+    .tab.active{
+      color: var(--text);
+      background: rgba(102,227,255,.10);
+      border:1px solid rgba(102,227,255,.18);
+    }
+    .tab .ticon{
+      width:22px; height:22px; display:grid; place-items:center;
+      border-radius: 8px;
+      background: rgba(255,255,255,.05);
+      border:1px solid var(--line);
+      font-weight:800;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Mozart</h1>
+          <small>Unidade: Loja 12 • Divinópolis</small>
+        </div>
+      </div>
+      <div class="actions">
+        <div class="pill">👤 Marcelo • Gestor</div>
+        <a class="bell" href="#" aria-label="Notificações">
+          🔔
+          <div class="badge">3</div>
+        </a>
+      </div>
+    </header>
+
+    <div class="section-title">
+      <h2>Status rápido</h2>
+      <span>Atualizado 09:42</span>
+    </div>
+
+    <section class="grid cards">
+      <a class="card" href="#">
+        <div class="row">
+          <div class="label">Hoje</div>
+          <span class="chip"><span class="dot ok"></span>Operando</span>
+        </div>
+        <div class="kpi">R$ 182k</div>
+        <div class="label">Vendas • 1.248 cupons</div>
+      </a>
+
+      <a class="card" href="#">
+        <div class="row">
+          <div class="label">Chamados</div>
+          <span class="chip"><span class="dot warn"></span>3 críticos</span>
+        </div>
+        <div class="kpi">18</div>
+        <div class="label">Abertos • SLA em risco</div>
+      </a>
+
+      <a class="card" href="#">
+        <div class="row">
+          <div class="label">Processos</div>
+          <span class="chip"><span class="dot ok"></span>OK</span>
+        </div>
+        <div class="kpi">7</div>
+        <div class="label">Em andamento • 2 aguardando</div>
+      </a>
+
+      <a class="card" href="#">
+        <div class="row">
+          <div class="label">Integrações</div>
+          <span class="chip"><span class="dot bad"></span>1 falha</span>
+        </div>
+        <div class="kpi">GLPI</div>
+        <div class="label">Webhook atraso • 12 min</div>
+      </a>
+    </section>
+
+    <div class="section-title" style="margin-top:14px">
+      <h2>Ações rápidas</h2>
+      <span>Contextuais</span>
+    </div>
+
+    <section class="quick">
+      <a class="qbtn" href="#">
+        <div class="qicon">+</div>
+        <div><b>Abrir chamado</b><small>Help Desk / GLPI</small></div>
+      </a>
+      <a class="qbtn" href="#">
+        <div class="qicon">▶</div>
+        <div><b>Iniciar processo</b><small>BPM / Aprovação</small></div>
+      </a>
+      <a class="qbtn" href="#">
+        <div class="qicon">📦</div>
+        <div><b>Consultar ativo</b><small>Patrimônio</small></div>
+      </a>
+      <a class="qbtn" href="#">
+        <div class="qicon">🤖</div>
+        <div><b>Perguntar à IA</b><small>Resumo / Sugestões</small></div>
+      </a>
+    </section>
+
+    <div class="section-title" style="margin-top:14px">
+      <h2>Feed inteligente</h2>
+      <span>Últimos eventos</span>
+    </div>
+
+    <section class="feed">
+      <a class="item" href="#">
+        <div class="ico">🎉</div>
+        <div>
+          <p><b>Chamado #5482</b> foi fechado com sucesso.</p>
+          <p><small>Requerente: Tesouraria • Técnico: Sirlei Junior</small></p>
+        </div>
+        <div class="meta">há 3 min</div>
+      </a>
+
+      <a class="item" href="#">
+        <div class="ico">⚠</div>
+        <div>
+          <p><b>Processo “Compra Emergencial”</b> travou no passo 3.</p>
+          <p><small>Motivo: pendência de aprovação • SLA: 1h</small></p>
+        </div>
+        <div class="meta">há 12 min</div>
+      </a>
+
+      <a class="item" href="#">
+        <div class="ico">🧠</div>
+        <div>
+          <p><b>IA sugere</b> revisar fornecedor “X” (atrasos recorrentes).</p>
+          <p><small>Base: últimos 30 dias • 6 ocorrências</small></p>
+        </div>
+        <div class="meta">hoje</div>
+      </a>
+    </section>
+
+    <section class="card ai" style="margin-top:14px">
+      <div class="row">
+        <div>
+          <div class="label">Copiloto</div>
+          <div style="font-weight:800; margin-top:4px;">O que você quer fazer agora?</div>
+        </div>
+        <span class="chip">Beta</span>
+      </div>
+
+      <div class="suggest">
+        <button class="sbtn" type="button">Resumo do dia</button>
+        <button class="sbtn" type="button">Gargalos do BPM</button>
+        <button class="sbtn" type="button">Chamados críticos</button>
+        <button class="sbtn" type="button">Lojas fora do padrão</button>
+      </div>
+
+      <div class="prompt">
+        <span style="opacity:.85">🤖</span>
+        <input placeholder="Digite: 'me mostre pendências por loja'..." />
+        <button class="send" type="button">➤</button>
+      </div>
+    </section>
+  </div>
+
+  <nav class="nav" aria-label="Navegação inferior">
+    <div class="inner">
+      <a class="tab active" href="home.html">
+        <div class="ticon">🏠</div>
+        Home
+      </a>
+      <a class="tab" href="indicadores.html">
+        <div class="ticon">📊</div>
+        Indicadores
+      </a>
+      <a class="tab" href="modulos.html">
+        <div class="ticon">🧩</div>
+        Módulos
+      </a>
+      <a class="tab" href="perfil.html">
+        <div class="ticon">👤</div>
+        Perfil
+      </a>
+    </div>
+  </nav>
+</body>
+</html>

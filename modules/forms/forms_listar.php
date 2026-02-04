@@ -1,200 +1,151 @@
 <?php
-// modules/forms/forms_listar.php
-ini_set('display_errors',1);
-ini_set('display_startup_errors',1);
-error_reporting(E_ALL);
+ini_set('display_errors',1); ini_set('display_startup_errors',1); error_reporting(E_ALL);
 
 require_once __DIR__ . '/../../config.php';
 require_once ROOT_PATH . '/system/config/autenticacao.php';
 require_once ROOT_PATH . '/system/config/connect.php';
 
 if (!isset($conn) && isset($mysqli)) { $conn = $mysqli; }
-if (!($conn instanceof mysqli)) { die('Conexão MySQLi $conn não encontrada.'); }
-if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
+if (!($conn instanceof mysqli)) die('Conexão MySQLi $conn não encontrada.');
 
-function q_all($sql,$types='',$params=[]) {
-    global $conn;
-    $st = $conn->prepare($sql);
-    if (!$st) { die('prepare:'.$conn->error); }
-    if ($types && $params) {
-        $refs=[];
-        foreach($params as $k=>$v){ $refs[$k] = &$params[$k]; }
-        $st->bind_param($types, ...$refs);
-    }
-    $st->execute();
-    $rs = $st->get_result();
-    $rows = [];
-    if ($rs) {
-        while($r = $rs->fetch_assoc()) { $rows[] = $r; }
-    }
-    $st->close();
-    return $rows;
-}
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+proteger_pagina();
 
-function table_exists($t){
-    global $conn;
-    $t = $conn->real_escape_string($t);
-    $rs = $conn->query("SHOW TABLES LIKE '$t'");
-    return $rs && $rs->num_rows > 0;
-}
+$conn->set_charset('utf8mb4');
 
-$flash   = $_SESSION['__flash'] ?? null; unset($_SESSION['__flash']);
+function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
-$q       = isset($_GET['q']) ? trim($_GET['q']) : '';
-$tipo    = isset($_GET['tipo']) ? trim($_GET['tipo']) : '';
-$ativos  = isset($_GET['ativos']) ? (int)$_GET['ativos'] : -1;
+$flash = $_SESSION['__flash']['m'] ?? '';
+unset($_SESSION['__flash']);
 
-// Garante existência da tabela
-if (!table_exists('moz_forms')) {
-    include_once ROOT_PATH.'system/includes/head.php';
-    include_once ROOT_PATH.'system/includes/navbar.php';
-    echo '<div id="page-wrapper"><div class="container-fluid"><div class="row"><div class="col-lg-12">';
-    echo '<h3 class="page-header">Formulários</h3>';
-    echo '<div class="alert alert-danger">Tabela moz_forms não encontrada no banco.</div>';
-    echo '</div></div></div></div>';
-    include_once ROOT_PATH.'system/includes/footer.php';
-    exit;
-}
-
-// Monta query com filtros
-$sql = "SELECT id, nome, slug, tipo, categoria, caminho_json, caminho_html,
-               versao, ativo, criado_por, criado_em, atualizado_em
-        FROM moz_forms
-        WHERE 1=1";
-
-$types = '';
-$params = [];
-
-if ($q !== '') {
-    $sql .= " AND (nome LIKE ? OR slug LIKE ? OR categoria LIKE ?)";
-    $types .= 'sss';
-    $like = "%".$q."%";
-    $params[] = $like;
-    $params[] = $like;
-    $params[] = $like;
-}
-
-if ($tipo !== '') {
-    $sql .= " AND tipo = ?";
-    $types .= 's';
-    $params[] = $tipo;
-}
-
-if ($ativos === 0 || $ativos === 1) {
-    $sql .= " AND ativo = ?";
-    $types .= 'i';
-    $params[] = $ativos;
-}
-
-$sql .= " ORDER BY tipo, categoria, nome, versao DESC";
-
-$rows = q_all($sql, $types, $params);
-
-include_once ROOT_PATH.'system/includes/head.php';
-include_once ROOT_PATH.'system/includes/navbar.php';
+$res = $conn->query("
+  SELECT id, code, title, status, current_version,
+         COALESCE(updated_at, created_at) AS dt
+  FROM forms_form
+  ORDER BY COALESCE(updated_at, created_at) DESC, id DESC
+");
+$rows = [];
+if ($res) while($r=$res->fetch_assoc()) $rows[]=$r;
 ?>
-<div id="page-wrapper">
-  <div class="container-fluid">
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Formulários</title>
+  <link rel="stylesheet" href="<?php echo h(BASE_URL); ?>/assets/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+<div class="container py-4">
 
-    <div class="row">
-      <div class="col-lg-12">
-        <h1 class="page-header">Formulários (Forms.js)</h1>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h3 class="mb-0">Formulários</h3>
+      <div class="text-muted">Forms AI • Catálogo do sistema</div>
+    </div>
+    <a class="btn btn-primary" href="<?php echo h(BASE_URL); ?>/public/modules/forms/wizard/1.php">
+      + Criar por IA
+    </a>
+  </div>
+
+  <?php if ($flash): ?>
+    <div class="alert alert-warning"><?php echo h($flash); ?></div>
+  <?php endif; ?>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Título</th>
+              <th>Status</th>
+              <th>Versão</th>
+              <th>Atualizado</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+          <?php foreach($rows as $r): ?>
+            <tr>
+              <td class="text-monospace"><?php echo h($r['code']); ?></td>
+              <td><?php echo h($r['title']); ?></td>
+              <td>
+                <?php
+                  $st = $r['status'];
+                  $badge = $st==='published'?'success':($st==='archived'?'secondary':'warning');
+                ?>
+                <span class="badge bg-<?php echo $badge; ?>"><?php echo h($st); ?></span>
+              </td>
+              <td>v<?php echo (int)$r['current_version']; ?></td>
+              <td><?php echo h($r['dt']); ?></td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary"
+                   href="<?php echo h(BASE_URL); ?>/public/modules/forms/forms_editar.php?id=<?php echo (int)$r['id']; ?>">
+                  Editar
+                </a>
+
+                <a class="btn btn-sm btn-outline-primary"
+                  href="<?php echo h(BASE_URL); ?>/public/modules/forms/forms_gerenciar.php?id=<?php echo (int)$r['id']; ?>">
+                  Gerenciar
+                </a>
+
+                <form method="post" action="<?php echo h(BASE_URL); ?>/modules/forms/actions/forms_new_version.php" class="d-inline"
+                      onsubmit="return confirm('Criar nova versão draft para <?php echo h(addslashes($r['code'])); ?>?');">
+                  <input type="hidden" name="id" value="<?php echo (int)$r['id']; ?>">
+                  <button class="btn btn-sm btn-outline-dark">Nova Versão</button>
+                </form>
+
+                <a class="btn btn-sm btn-outline-secondary"
+                  href="<?php echo h(BASE_URL); ?>/public/modules/forms/runtime/render.php?form_id=<?php echo (int)$r['id']; ?>">
+                  Runtime
+                </a>
+
+
+                <?php if ($r['status'] !== 'published'): ?>
+                  <form class="d-inline" method="post"
+                        action="<?php echo h(BASE_URL); ?>/modules/forms/actions/forms_toggle.php"
+                        onsubmit="return confirm('Publicar este formulário?');">
+                    <input type="hidden" name="id" value="<?php echo (int)$r['id']; ?>">
+                    <input type="hidden" name="to" value="published">
+                    <button class="btn btn-sm btn-outline-success">Publicar</button>
+                  </form>
+                <?php endif; ?>
+
+                <?php if ($r['status'] === 'archived'): ?>
+                  <form class="d-inline" method="post"
+                        action="<?php echo h(BASE_URL); ?>/modules/forms/actions/forms_toggle.php"
+                        onsubmit="return confirm('Desbloquear este formulário (voltar para draft)?');">
+                    <input type="hidden" name="id" value="<?php echo (int)$r['id']; ?>">
+                    <input type="hidden" name="to" value="draft">
+                    <button class="btn btn-sm btn-outline-secondary">Desbloquear</button>
+                  </form>
+                <?php else: ?>
+                  <form class="d-inline" method="post"
+                        action="<?php echo h(BASE_URL); ?>/modules/forms/actions/forms_toggle.php"
+                        onsubmit="return confirm('Bloquear este formulário? (Arquivar)');">
+                    <input type="hidden" name="id" value="<?php echo (int)$r['id']; ?>">
+                    <input type="hidden" name="to" value="archived">
+                    <button class="btn btn-sm btn-outline-secondary">Bloquear</button>
+                  </form>
+                <?php endif; ?>
+
+                <form class="d-inline" method="post"
+                      action="<?php echo h(BASE_URL); ?>/modules/forms/actions/forms_delete.php"
+                      onsubmit="return confirm('Excluir DEFINITIVAMENTE este formulário?');">
+                  <input type="hidden" name="id" value="<?php echo (int)$r['id']; ?>">
+                  <button class="btn btn-sm btn-outline-danger">Deletar</button>
+                </form>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+          </tbody>
+        </table>
       </div>
     </div>
-
-    <?php if ($flash): ?>
-      <div class="alert alert-info"><?= htmlspecialchars($flash['m']) ?></div>
-    <?php endif; ?>
-
-    <form class="form-inline" method="get" style="margin-bottom:10px;">
-      <input class="form-control"
-             name="q"
-             value="<?= htmlspecialchars($q) ?>"
-             placeholder="Buscar por nome/slug/categoria">
-
-      <select class="form-control" name="tipo" style="margin-left:8px;">
-        <option value="">Todos os tipos</option>
-        <?php
-        $tipos = [
-          'helpdesk' => 'Helpdesk',
-          'bpm'      => 'BPM',
-          'outro'    => 'Outro'
-        ];
-        foreach ($tipos as $val => $label):
-        ?>
-          <option value="<?= $val ?>" <?= $tipo === $val ? 'selected' : '' ?>>
-            <?= htmlspecialchars($label) ?>
-          </option>
-        <?php endforeach; ?>
-      </select>
-
-      <label class="checkbox-inline" style="margin-left:8px;">
-        <input type="checkbox" name="ativos" value="1" <?= $ativos === 1 ? 'checked' : ''; ?>>
-        Somente ativos
-      </label>
-
-      <button class="btn btn-primary" type="submit">Filtrar</button>
-
-      <!-- Ajuste o caminho do designer conforme onde ele estiver -->
-      <a class="btn btn-success" href="<?= BASE_URL ?>/modules/forms/forms_designer.php">
-        + Novo Formulário
-      </a>
-    </form>
-
-    <div class="table-responsive">
-      <table class="table table-striped table-bordered">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Nome</th>
-            <th>Slug</th>
-            <th>Tipo</th>
-            <th>Categoria</th>
-            <th>Versão</th>
-            <th>Ativo</th>
-            <th>Criado em</th>
-            <th style="width:230px;">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-        <?php if (!$rows): ?>
-          <tr>
-            <td colspan="9" class="text-center text-muted">Nenhum formulário encontrado.</td>
-          </tr>
-        <?php else: foreach ($rows as $r): ?>
-          <tr>
-            <td><?= (int)$r['id'] ?></td>
-            <td><?= htmlspecialchars($r['nome']) ?></td>
-            <td><?= htmlspecialchars($r['slug']) ?></td>
-            <td><?= htmlspecialchars($r['tipo']) ?></td>
-            <td><?= htmlspecialchars($r['categoria'] ?? '') ?></td>
-            <td><?= (int)$r['versao'] ?></td>
-            <td><?= ((int)$r['ativo'] === 1 ? 'Ativo' : 'Inativo') ?></td>
-            <td><?= htmlspecialchars($r['criado_em']) ?></td>
-            <td>
-              <!-- Editar no designer: você depois ajusta o designer para carregar pelo ID -->
-              <a class="btn btn-xs btn-default"
-                 href="<?= BASE_URL ?>/modules/forms/forms_designer.php?id=<?= (int)$r['id'] ?>">
-                Editar
-              </a>
-
-              <a class="btn btn-xs btn-warning"
-                 href="<?= BASE_URL ?>/modules/forms/actions/forms_toggle.php?id=<?= (int)$r['id'] ?>">
-                Ativar/Desativar
-              </a>
-
-              <a class="btn btn-xs btn-danger"
-                 href="<?= BASE_URL ?>/modules/forms/actions/forms_delete.php?id=<?= (int)$r['id'] ?>"
-                 onclick="return confirm('Excluir este formulário? Certifique-se de que ele não está em uso em processos ou serviços.');">
-                Excluir
-              </a>
-            </td>
-          </tr>
-        <?php endforeach; endif; ?>
-        </tbody>
-      </table>
-    </div>
-
   </div>
+
 </div>
-<?php include_once ROOT_PATH.'system/includes/footer.php'; ?>
+</body>
+</html>

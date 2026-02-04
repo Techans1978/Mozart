@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mozart App - Ajuda</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --text:#e7eef8; --muted:#a7b3c6; --line:rgba(255,255,255,.08);
+      --max:520px; --radius:18px; --shadow:0 10px 24px rgba(0,0,0,.25);
+      --accent:#66e3ff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
+    a{color:inherit;text-decoration:none}
+    .app{max-width:var(--max);margin:0 auto;min-height:100vh;padding:14px 14px 22px}
+    .top{display:flex;justify-content:space-between;align-items:center;padding:8px 2px 14px}
+    h1{margin:0;font-size:16px}
+    .muted{color:var(--muted);font-size:12px}
+    input, select, textarea{
+      width:100%; padding:12px; border-radius:14px;
+      border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:90px;resize:vertical}
+    .card{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      border-radius:var(--radius);
+      padding:14px;
+      box-shadow:var(--shadow);
+      margin-bottom:12px;
+    }
+    .row{display:flex;gap:10px;align-items:center}
+    .grid{display:grid;gap:10px;grid-template-columns:repeat(2,1fr)}
+    .tile{
+      padding:12px;border-radius:16px;border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      display:flex;gap:12px;align-items:flex-start
+    }
+    .ico{
+      width:34px;height:34px;border-radius:12px;border:1px solid var(--line);
+      background:rgba(0,0,0,.18);display:grid;place-items:center;font-weight:900;color:var(--accent)
+    }
+    .btn{
+      width:100%; padding:12px 14px;border-radius:16px;
+      border:1px solid rgba(102,227,255,.22);
+      background:rgba(102,227,255,.10);
+      color:var(--text);font-weight:900;cursor:pointer;
+    }
+    .btn.secondary{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      font-weight:800;
+    }
+    .tag{font-size:11px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;white-space:nowrap}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="top">
+      <div>
+        <h1>Ajuda & Base</h1>
+        <div class="muted">FAQ, tutoriais e abertura rápida</div>
+      </div>
+      <a class="muted" href="recursos.html">Voltar</a>
+    </div>
+
+    <div class="card">
+      <input placeholder="Buscar na base (ex: inventário, etiqueta, SLA...)" />
+      <div class="grid" style="margin-top:10px">
+        <a class="tile" href="#">
+          <div class="ico">📘</div>
+          <div>
+            <div style="font-weight:900">Guia rápido</div>
+            <div class="muted" style="margin-top:4px">Cadastro de ativos em 2 min</div>
+            <div style="margin-top:8px"><span class="tag">Ativos</span></div>
+          </div>
+        </a>
+        <a class="tile" href="#">
+          <div class="ico">🧩</div>
+          <div>
+            <div style="font-weight:900">Integrações</div>
+            <div class="muted" style="margin-top:4px">GLPI / BPM / Conectores</div>
+            <div style="margin-top:8px"><span class="tag">TI</span></div>
+          </div>
+        </a>
+        <a class="tile" href="#">
+          <div class="ico">🧠</div>
+          <div>
+            <div style="font-weight:900">Perguntar à IA</div>
+            <div class="muted" style="margin-top:4px">Resumos e “o que fazer”</div>
+            <div style="margin-top:8px"><span class="tag">Copiloto</span></div>
+          </div>
+        </a>
+        <a class="tile" href="#">
+          <div class="ico">🎥</div>
+          <div>
+            <div style="font-weight:900">Tutoriais</div>
+            <div class="muted" style="margin-top:4px">Vídeos curtos por tarefa</div>
+            <div style="margin-top:8px"><span class="tag">Treino</span></div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900;margin-bottom:10px">Abrir chamado rápido</div>
+      <div class="row">
+        <select>
+          <option>Categoria: Ativos</option>
+          <option>Categoria: TI Infra</option>
+          <option>Categoria: Sistemas</option>
+          <option>Categoria: Operação</option>
+        </select>
+        <select>
+          <option>Prioridade: Normal</option>
+          <option>Prioridade: Alta</option>
+          <option>Prioridade: Crítica</option>
+        </select>
+      </div>
+      <div style="margin-top:10px">
+        <input placeholder="Assunto (ex: etiqueta não lê / divergência inventário)" />
+      </div>
+      <div style="margin-top:10px">
+        <textarea placeholder="Descreva o problema. (Pode colar nº do ativo, nº do chamado/processo etc.)"></textarea>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn secondary" type="button">Anexar foto</button>
+        <button class="btn" type="button">Enviar</button>
+      </div>
+      <div class="muted" style="margin-top:8px">
+        Dica: se for ativo, informe “Tag”, “Serial” e a unidade.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mozart App - Notificações</title>
+  <style>
+    :root{--bg:#0b0f14;--text:#e7eef8;--muted:#a7b3c6;--line:rgba(255,255,255,.08);--max:520px;--radius:18px;--shadow:0 10px 24px rgba(0,0,0,.25);--accent:#66e3ff}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
+    .app{max-width:var(--max);margin:0 auto;min-height:100vh;padding:14px 14px 22px}
+    .top{display:flex;justify-content:space-between;align-items:center;padding:8px 2px 14px}
+    h1{margin:0;font-size:16px}
+    .muted{color:var(--muted);font-size:12px}
+    .card{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);margin-bottom:12px}
+    .item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+    .item:first-of-type{border-top:0}
+    .toggle{
+      width:46px;height:28px;border-radius:999px;border:1px solid var(--line);
+      background:rgba(255,255,255,.04); position:relative;
+    }
+    .toggle:before{
+      content:""; position:absolute; top:3px; left:3px;
+      width:22px;height:22px;border-radius:999px;background:rgba(255,255,255,.25);
+    }
+    .btn{
+      width:100%; padding:12px 14px;border-radius:16px;border:1px solid rgba(102,227,255,.22);
+      background:rgba(102,227,255,.10);color:var(--text);font-weight:900;cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="top">
+      <div>
+        <h1>Notificações</h1>
+        <div class="muted">Controle por módulo e canal</div>
+      </div>
+      <a class="muted" href="recursos.html">Voltar</a>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900;margin-bottom:10px">Canais</div>
+      <div class="item">
+        <div>
+          <div style="font-weight:800">E-mail</div>
+          <div class="muted">Chamados, BPM, agenda, alertas</div>
+        </div>
+        <div class="toggle" aria-hidden="true"></div>
+      </div>
+      <div class="item">
+        <div>
+          <div style="font-weight:800">Push (app)</div>
+          <div class="muted">Notificações rápidas no celular</div>
+        </div>
+        <div class="toggle" aria-hidden="true"></div>
+      </div>
+      <div class="item">
+        <div>
+          <div style="font-weight:800">Resumo diário</div>
+          <div class="muted">Receber um “fechamento do dia”</div>
+        </div>
+        <div class="toggle" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900;margin-bottom:10px">Integração de e-mail</div>
+      <div class="muted" style="margin-bottom:10px">
+        Conectar um e-mail corporativo para receber alertas e confirmar ações.
+      </div>
+      <button class="btn" type="button">Conectar e-mail corporativo</button>
+      <div class="muted" style="margin-top:10px">
+        Pode ser Exchange/Microsoft 365, Google Workspace ou SMTP interno.
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900;margin-bottom:10px">Por módulo</div>
+      <div class="item"><div>Help Desk</div><div class="muted">Críticos + SLA</div></div>
+      <div class="item"><div>BPM</div><div class="muted">Tarefas + atrasos</div></div>
+      <div class="item"><div>Ativos</div><div class="muted">Inventário + vencimentos</div></div>
+      <div class="item"><div>Conectores</div><div class="muted">Falhas + filas</div></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -108,9 +108,17 @@ if (!$state) {
           if (!empty($json['language']['actors_dictionary_text'])) {
             $state['actors_dict'] = (string)$json['language']['actors_dictionary_text'];
           }
-          if (!empty($json['steps']) && is_array($json['steps'])) {
-            $state['steps'] = $json['steps'];
-          }
+if (!empty($json['steps']) && is_array($json['steps'])) {
+  $tmpSteps = $json['steps'];
+
+  // Normaliza para array numérico (evita virar objeto no JS)
+  $keys = array_keys($tmpSteps);
+  $isNumericSeq = ($keys === range(0, count($tmpSteps)-1));
+  if (!$isNumericSeq) $tmpSteps = array_values($tmpSteps);
+
+  $state['steps'] = $tmpSteps;
+}
+
           if (!empty($json['transitions']) && is_array($json['transitions'])) {
             $state['transitions'] = $json['transitions'];
           }
